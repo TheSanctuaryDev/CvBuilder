@@ -1,0 +1,238 @@
+/*
+ * CV - Pauline Marleau
+ * Colors:
+ *   --bg:           #ffffff  (fond blanc)
+ *   --text-dark:    #1a1a1a  (texte principal, titres)
+ *   --text-mid:     #333333  (texte corps, italiques)
+ *   --text-light:   #555555  (dates, secondaire)
+ *   --skill-fill:   #4a4a4a  (barre compétence remplie)
+ *   --skill-bg:     #cccccc  (fond barre compétence)
+ * Font: Open Sans (Google Fonts)
+ */
+
+/* === RESET === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ul {
+  list-style: none;
+}
+
+body {
+  background: #e0e0e0;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* === CV CONTAINER A4 === */
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: auto;
+  background: #ffffff;
+  overflow: hidden;
+  padding: 12mm 14mm 10mm 14mm;
+}
+
+/* === HEADER === */
+.cv-header {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 5mm;
+}
+
+.cv-header__left {
+  float: left;
+  width: 130mm;
+}
+
+.cv-header__photo {
+  float: right;
+  width: 38mm;
+  height: 46mm;
+  overflow: hidden;
+  background: #c8b8a8;
+}
+
+/* Photo : remplace src="VOTRE_URL_PHOTO_ICI" dans le HTML par ton URL */
+.cv-header__photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.cv-header__name {
+  font-size: 22pt;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: 0.3px;
+  margin-bottom: 5mm;
+  line-height: 1.1;
+}
+
+/* === CONTACT TABLE === */
+.cv-header__contact {
+  border-collapse: collapse;
+  width: auto;
+}
+
+.cv-header__contact tr {
+  line-height: 1.7;
+}
+
+.cv-contact__label {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  padding-right: 3mm;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.cv-contact__value {
+  font-size: 8.5pt;
+  font-weight: 400;
+  color: #333333;
+  vertical-align: top;
+}
+
+/* === ACCROCHE === */
+.cv-accroche {
+  font-size: 8pt;
+  font-weight: 400;
+  color: #1a1a1a;
+  line-height: 1.65;
+  margin-bottom: 5mm;
+  clear: both;
+}
+
+/* === SECTIONS === */
+.cv-section {
+  margin-bottom: 4mm;
+}
+
+.cv-section__title {
+  font-size: 13pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1mm;
+  line-height: 1.2;
+}
+
+.cv-section__rule {
+  width: 100%;
+  height: 1px;
+  background: #1a1a1a;
+  margin-bottom: 3mm;
+}
+
+/* === ENTRY (date + content layout) === */
+.cv-entry {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 3mm;
+}
+
+.cv-entry__date {
+  float: left;
+  width: 34mm;
+  font-size: 7.5pt;
+  font-weight: 400;
+  color: #555555;
+  line-height: 1.6;
+  padding-top: 0.5pt;
+}
+
+.cv-entry__content {
+  margin-left: 36mm;
+}
+
+.cv-entry__role {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5mm;
+  line-height: 1.3;
+}
+
+.cv-entry__company {
+  font-size: 8pt;
+  font-weight: 400;
+  font-style: italic;
+  color: #333333;
+  margin-bottom: 1.5mm;
+  line-height: 1.4;
+}
+
+/* === BULLET LIST === */
+.cv-entry__list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.cv-entry__list li {
+  font-size: 7.8pt;
+  font-weight: 400;
+  color: #1a1a1a;
+  line-height: 1.55;
+  padding-left: 4mm;
+  position: relative;
+}
+
+.cv-entry__list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #1a1a1a;
+  font-size: 8pt;
+}
+
+.cv-entry__list--spaced {
+  margin-top: 1.5mm;
+}
+
+/* === INTERESTS === */
+.cv-interest__item {
+  font-size: 8pt;
+  font-weight: 400;
+  color: #1a1a1a;
+  line-height: 1.8;
+}
+
+/* === SKILL BAR === */
+.cv-skill {
+  overflow: hidden;
+  margin-bottom: 2mm;
+}
+
+.cv-skill__label {
+  display: inline-block;
+  font-size: 8pt;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin-bottom: 1.5mm;
+  vertical-align: middle;
+  width: 80mm;
+}
+
+.cv-skill__bar {
+  display: inline-block;
+  width: 50mm;
+  height: 3mm;
+  background: #cccccc;
+  vertical-align: middle;
+  position: relative;
+}
+
+.cv-skill__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #4a4a4a;
+}

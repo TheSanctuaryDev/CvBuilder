@@ -1,0 +1,1258 @@
+﻿@page
+@model CvBuilderApp.Pages.Create_CvModel
+@{
+    ViewData["Title"] = "Créer votre CV";
+}
+
+@* --- intl-tel-input CSS LOCAL --- *@
+<link rel="stylesheet" href="~/lib/intl-tel-input/css/intlTelInput.min.css" />
+
+<section class="cv-wizard">
+    @* --- AFFICHAGE DES ERREURS SERVEUR --- *@
+    @if (!ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <div asp-validation-summary="All"></div>
+        </div>
+    }
+
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <form id="cvForm" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="CvData.SelectedTemplate" id="hiddenTemplateInput">
+        <input type="hidden" asp-for="CvData.IsPremium" id="hiddenIsPremiumInput">
+
+        <div class="step active">
+            <h2>Informations personnelles</h2>
+            <div class="form-group">
+                <input type="text" asp-for="CvData.FullName" placeholder="Nom complet" required>
+
+                @* --- CHAMP EMAIL AVEC TAGS --- *@
+                <div class="email-wrapper">
+                    <div class="email-tags-container" id="emailTagsContainer"></div>
+                    <div class="email-input-row" id="emailInputRow">
+                        <input type="email" id="emailInput" placeholder="Adresse email" autocomplete="email">
+                        <button type="button" id="addEmailBtn" class="add-email-btn" title="Ajouter">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <small class="email-hint">Appuyez sur + ou Entrée pour ajouter. Max 2 emails.</small>
+                    <input type="hidden" asp-for="CvData.Email" id="emailHidden">
+                </div>
+
+                @* --- CHAMP TÉLÉPHONE AVEC TAGS --- *@
+                <div class="phone-wrapper">
+                    <div class="phone-tags-container" id="phoneTagsContainer"></div>
+                    <div class="phone-input-row" id="phoneInputRow">
+                        <input type="tel" id="phoneInput" placeholder="Numéro de téléphone" autocomplete="tel">
+                        <button type="button" id="addPhoneBtn" class="add-phone-btn" title="Ajouter">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2V14M2 8H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <small class="phone-hint">Appuyez sur + ou Entrée pour ajouter. Max 3 numéros.</small>
+                    <input type="hidden" asp-for="CvData.Phone" id="phoneHidden">
+                </div>
+
+                <input type="text" asp-for="CvData.Address" placeholder="Adresse">
+                <input type="url" asp-for="CvData.LinkedIn" placeholder="URL LinkedIn (ex : https://linkedin.com/in/votre-profil)" />
+                <input type="url" asp-for="CvData.GitHub" placeholder="URL GitHub (ex : https://github.com/votre-pseudo)" />
+            </div>
+            <button type="button" class="next">Suivant</button>
+        </div>
+
+        <div class="step">
+            <h2>Profil & Photo</h2>
+            <p class="hint">Laissez le résumé vide si vous souhaitez que l'IA le rédige pour vous.</p>
+            <textarea asp-for="CvData.Summary" placeholder="Résumé professionnel (optionnel) — ex : Médecin passionné avec 5 ans d'expérience..."></textarea>
+            <input type="text" asp-for="CvData.FieldOfActivity" placeholder="Domaine d'activité (ex : Relations internationales, Designer UX...)" required />
+
+            <div class="file-input-group mt-3">
+                <label>Photo de profil</label>
+                <input type="file" asp-for="PhotoUpload" accept="image" id="photoInput">
+                <div id="photoPreview" class="mt-2"></div>
+            </div>
+
+            <button type="button" class="prev">Retour</button>
+            <button type="button" class="next">Suivant</button>
+        </div>
+
+        <div class="step">
+            <h2>Expérience professionnelle</h2>
+            <p class="hint">Séparez vos expériences par des sauts de ligne.</p>
+            <textarea name="ExperienceRaw" placeholder="Ex :&#10;2022-2024 — Développeur Full Stack chez TheSanctuaryDev&#10;  - Développement d'APIs REST en ASP.NET&#10;  - Intégration de bases de données SQL Server&#10;&#10;2020-2022 — Stagiaire Web chez StartupXYZ&#10;  - Création de pages web responsive" required style="min-height: 200px;">@(Model.CvData.Experience == null ? "" : string.Join("\n", Model.CvData.Experience))</textarea>
+
+            <button type="button" class="prev">Retour</button>
+            <button type="button" class="next">Suivant</button>
+        </div>
+
+        <div class="step">
+            <h2>Formation & Langues</h2>
+            <textarea name="FormationRaw" placeholder="Diplômes et établissements...Ex :&#10;2018-2022 — Licence Informatique — Université d'Oxford&#10;2022-2024 — Master Génie Logiciel — EPAC&#10;2018 — Baccalauréat Série D — Lycée Technique" required>@(Model.CvData.Formation == null ? "" : string.Join("\n", Model.CvData.Formation))</textarea>
+            <textarea asp-for="CvData.Languages" placeholder="Langues...Ex :&#10;Français : Langue maternelle&#10;Anglais : Courant (B2)&#10;Espagnol : Notions (A2)" required></textarea>
+
+            <button type="button" class="prev">Retour</button>
+            <button type="button" class="next">Suivant</button>
+        </div>
+
+        <div class="step">
+            <h2>Derniers détails</h2>
+            <textarea name="SkillsRaw" placeholder="Compétences...Ex :&#10;C#, ASP.NET Core, SQL Server&#10;JavaScript, React, HTML/CSS&#10;Git, Docker, Azure&#10;Gestion de projet, Travail en équipe" required>@(Model.CvData.Skills == null ? "" : string.Join("\n", Model.CvData.Skills))</textarea>
+            <textarea name="InterestsRaw" placeholder="Centres d'intérêt...Ex :&#10Lecture, Musique, Sport">@(Model.CvData.Interests == null ? "" : string.Join("\n", Model.CvData.Interests))</textarea>
+            <textarea name="ContestsWonRaw" placeholder="Récompenses & prix...Ex :&#10;1er prix — Hackathon National 2023&#10;Lauréat — Concours Innovation Tech 2022">@(Model.CvData.ContestsWon == null ? "" : string.Join("\n", Model.CvData.ContestsWon))</textarea>
+            <textarea name="ReferencesRaw" placeholder="Références...Ex :&#10;Jean Dupont — Directeur Technique chez TechCorp — jean.dupont@techcorp.com&#10;Marie Martin — RH chez StartupXYZ — +229 XX XX XX XX">@(Model.CvData.References == null ? "" : string.Join("\n", Model.CvData.References))</textarea>
+
+            <button type="button" class="prev">Retour</button>
+            <button type="submit" class="submit" id="submitBtn">Générer mon CV</button>
+        </div>
+    </form>
+
+    @* --- OVERLAY DE GÉNÉRATION --- *@
+    <div id="generationOverlay" style="display:none;">
+        <div class="generation-card">
+            <div class="ai-spinner">
+                <div class="spinner-ring outer"></div>
+                <div class="spinner-ring middle"></div>
+                <div class="spinner-ring inner"></div>
+                <div class="spinner-icon">✦</div>
+            </div>
+            <div class="generation-percent" id="generationPercent">0%</div>
+            <div class="generation-bar-container">
+                <div class="generation-bar" id="generationBar"></div>
+            </div>
+            <div class="generation-message" id="generationMessage">
+                Initialisation du service...
+            </div>
+            <p class="generation-submessage">
+                Votre CV professionnel est en cours de création.<br>
+                Cela peut prendre jusqu'à 60 secondes.
+            </p>
+        </div>
+    </div>
+</section>
+
+@* --- intl-tel-input JS LOCAL --- *@
+<script src="~/lib/intl-tel-input/js/intlTelInput.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+    // ─────────────────────────────────────────────
+    // 1. UTILITAIRES
+    // ─────────────────────────────────────────────
+
+    function safeGetStorage(key) {
+        try { return localStorage.getItem(key); }
+        catch (e) { return null; }
+    }
+ function isValidEmail(email) {
+        var atIndex = email.indexOf(String.fromCharCode(64));
+        if (atIndex < 1) return false;
+        var dotIndex = email.lastIndexOf(".");
+        return dotIndex > atIndex + 1 && dotIndex < email.length - 1;
+    }
+
+    function makeSvgRemove() {
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "10");
+        svg.setAttribute("height", "10");
+        svg.setAttribute("viewBox", "0 0 10 10");
+        svg.setAttribute("fill", "none");
+        var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M1 1L9 9M9 1L1 9");
+        path.setAttribute("stroke", "currentColor");
+        path.setAttribute("stroke-width", "1.5");
+        path.setAttribute("stroke-linecap", "round");
+        svg.appendChild(path);
+        return svg;
+    }
+
+    // ─────────────────────────────────────────────
+    // 2. TEMPLATE DEPUIS LOCALSTORAGE
+    // ─────────────────────────────────────────────
+
+    var hiddenTemplateInput = document.getElementById("hiddenTemplateInput");
+    var hiddenIsPremiumInput = document.getElementById("hiddenIsPremiumInput");
+
+    var savedTemplate = safeGetStorage("template");
+    var savedIsPremium = safeGetStorage("isPremium");
+
+    if (savedTemplate && hiddenTemplateInput) hiddenTemplateInput.value = savedTemplate;
+    if (savedIsPremium !== null && hiddenIsPremiumInput) {
+        hiddenIsPremiumInput.value = (savedIsPremium === "true") ? "true" : "false";
+    }
+
+    // ─────────────────────────────────────────────
+    // 3. SYSTÈME DE TAGS EMAIL
+    // ─────────────────────────────────────────────
+
+    var emailInput         = document.getElementById("emailInput");
+    var emailHidden        = document.getElementById("emailHidden");
+    var emailTagsContainer = document.getElementById("emailTagsContainer");
+    var addEmailBtn        = document.getElementById("addEmailBtn");
+    var emailInputRow      = document.getElementById("emailInputRow");
+
+    var MAX_EMAILS     = 2;
+    var emailAddresses = [];
+
+    function syncEmailHidden() {
+        // ✅ FIX CRITIQUE : synchronise le champ caché avec le premier email
+        // pour que CvData.Email reçoive toujours une valeur au POST
+        emailHidden.value = emailAddresses.length > 0 ? emailAddresses[0] : "";
+    }
+
+    function renderEmailTags() {
+        emailTagsContainer.innerHTML = "";
+
+        emailAddresses.forEach(function (email, index) {
+            var tag  = document.createElement("div");
+            tag.className = "email-tag";
+
+            var span = document.createElement("span");
+            span.className   = "email-tag-address";
+            span.textContent = email;
+
+            var btn = document.createElement("button");
+            btn.type      = "button";
+            btn.className = "email-tag-remove";
+            btn.dataset.index = index;
+            btn.title = "Supprimer";
+            btn.appendChild(makeSvgRemove());
+            btn.addEventListener("click", function () {
+                emailAddresses.splice(parseInt(this.dataset.index), 1);
+                syncEmailHidden();
+                renderEmailTags();
+            });
+
+            tag.appendChild(span);
+            tag.appendChild(btn);
+            emailTagsContainer.appendChild(tag);
+        });
+
+        emailInputRow.style.display = emailAddresses.length >= MAX_EMAILS ? "none" : "flex";
+    }
+
+    function addEmailAddress() {
+        if (emailAddresses.length >= MAX_EMAILS) return;
+
+        var raw = emailInput.value.trim();
+        if (!raw) return;
+
+        if (!isValidEmail(raw)) {
+            emailInput.classList.add("is-invalid");
+            emailInput.focus();
+            return;
+        }
+
+        if (emailAddresses.includes(raw)) {
+            emailInput.value = "";
+            return;
+        }
+
+        emailInput.classList.remove("is-invalid");
+        emailAddresses.push(raw);
+        syncEmailHidden(); // ✅ Synchronisation immédiate
+        renderEmailTags();
+        emailInput.value = "";
+        emailInput.focus();
+    }
+
+    if (addEmailBtn) addEmailBtn.addEventListener("click", addEmailAddress);
+    if (emailInput) {
+        emailInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { e.preventDefault(); addEmailAddress(); }
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    // 4. SYSTÈME DE TAGS TÉLÉPHONE
+    // ─────────────────────────────────────────────
+
+    var phoneInputEl       = document.getElementById("phoneInput");
+    var phoneHidden        = document.getElementById("phoneHidden");
+    var phoneTagsContainer = document.getElementById("phoneTagsContainer");
+    var addPhoneBtn        = document.getElementById("addPhoneBtn");
+    var phoneInputRow      = document.getElementById("phoneInputRow");
+
+    var MAX_PHONES   = 3;
+    var phoneNumbers = [];
+
+    var iti = null;
+    if (phoneInputEl && window.intlTelInput) {
+        iti = window.intlTelInput(phoneInputEl, {
+            initialCountry: "bj",
+            preferredCountries: ["bj", "fr", "sn", "ci", "tg", "cm", "cd", "mg"],
+            separateDialCode: true,
+            allowDropdown: true,
+            dropdownContainer: document.body,
+            utilsScript: "/lib/intl-tel-input/js/utils.js"
+        });
+    }
+
+    function syncPhoneHidden() {
+        phoneHidden.value = phoneNumbers.join(",");
+    }
+
+    function renderPhoneTags() {
+        phoneTagsContainer.innerHTML = "";
+
+        phoneNumbers.forEach(function (number, index) {
+            var tag  = document.createElement("div");
+            tag.className = "phone-tag";
+
+            var span = document.createElement("span");
+            span.className   = "phone-tag-number";
+            span.textContent = number;
+
+            var btn = document.createElement("button");
+            btn.type      = "button";
+            btn.className = "phone-tag-remove";
+            btn.dataset.index = index;
+            btn.title = "Supprimer";
+            btn.appendChild(makeSvgRemove());
+            btn.addEventListener("click", function () {
+                phoneNumbers.splice(parseInt(this.dataset.index), 1);
+                syncPhoneHidden();
+                renderPhoneTags();
+            });
+
+            tag.appendChild(span);
+            tag.appendChild(btn);
+            phoneTagsContainer.appendChild(tag);
+        });
+
+        phoneInputRow.style.display = phoneNumbers.length >= MAX_PHONES ? "none" : "flex";
+    }
+
+    function addPhoneNumber() {
+        if (phoneNumbers.length >= MAX_PHONES) return;
+
+        var raw = phoneInputEl.value.trim();
+        if (!raw) return;
+
+        var number = (iti && iti.isValidNumber())
+            ? iti.getNumber()
+            : (iti && iti.getSelectedCountryData().dialCode
+                ? "+" + iti.getSelectedCountryData().dialCode + raw
+                : raw);
+
+        if (phoneNumbers.includes(number)) {
+            phoneInputEl.value = "";
+            return;
+        }
+
+        phoneNumbers.push(number);
+        syncPhoneHidden();
+        renderPhoneTags();
+        phoneInputEl.value = "";
+        phoneInputEl.focus();
+    }
+
+    if (addPhoneBtn) addPhoneBtn.addEventListener("click", addPhoneNumber);
+    if (phoneInputEl) {
+        phoneInputEl.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { e.preventDefault(); addPhoneNumber(); }
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    // 5. WIZARD MULTI-ÉTAPES
+    // ─────────────────────────────────────────────
+
+    var steps    = document.querySelectorAll(".step");
+    var nextBtns = document.querySelectorAll(".next");
+    var prevBtns = document.querySelectorAll(".prev");
+    var progress = document.getElementById("progress");
+    var form      = document.getElementById("cvForm");
+    var submitBtn = document.getElementById("submitBtn");
+
+    var currentStep = 0;
+
+    function updateSteps() {
+        steps.forEach(function (step, index) {
+            step.classList.toggle("active", index === currentStep);
+        });
+
+        if (progress) {
+            progress.style.width = ((currentStep / (steps.length - 1)) * 100) + "%";
+        }
+
+        var scrollTarget = window.innerWidth > 768
+            ? document.querySelector(".cv-wizard")
+            : null;
+
+        setTimeout(function () {
+            if (scrollTarget) {
+                scrollTarget.scrollIntoView({ behavior: "smooth", block: "start" });
+            } else {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }, 150);
+    }
+
+    function validateStep(stepIndex) {
+        var inputs = steps[stepIndex].querySelectorAll("input[required], textarea[required]");
+        var allValid = true;
+
+        inputs.forEach(function (input) {
+            var empty = !input.value.trim();
+            input.classList.toggle("is-invalid", empty);
+            if (empty) allValid = false;
+        });
+
+        return allValid;
+    }
+
+    nextBtns.forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            // Validation email obligatoire à l'étape 0
+            if (currentStep === 0 && emailAddresses.length === 0) {
+                emailInput.classList.add("is-invalid");
+                emailInput.focus();
+                return;
+            }
+
+            if (validateStep(currentStep) && currentStep < steps.length - 1) {
+                currentStep++;
+                updateSteps();
+            }
+        });
+    });
+
+    prevBtns.forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (currentStep > 0) { currentStep--; updateSteps(); }
+        });
+    });
+
+    // ─────────────────────────────────────────────
+    // 6. ANIMATION DE GÉNÉRATION
+    // ─────────────────────────────────────────────
+
+    var overlay    = document.getElementById("generationOverlay");
+    var percentEl  = document.getElementById("generationPercent");
+    var barEl      = document.getElementById("generationBar");
+    var messageEl  = document.getElementById("generationMessage");
+
+    var messages = [
+        { min: 0,  max: 15,  text: "Initialisation des données..." },
+        { min: 15, max: 30,  text: "Analyse de votre profil..." },
+        { min: 30, max: 45,  text: "Rédaction du contenu professionnel..." },
+        { min: 45, max: 60,  text: "Application du design du template..." },
+        { min: 60, max: 75,  text: "Mise en page professionnelle..." },
+        { min: 75, max: 88,  text: "Optimisation typographique..." },
+        { min: 88, max: 96,  text: "Dernières retouches..." },
+        { min: 96, max: 100, text: "Votre CV est presque prêt..." }
+    ];
+
+    var animationFrame = null;
+
+    function getMessageForPercent(p) {
+        var found = messages.find(function (m) { return p >= m.min && p < m.max; });
+        return found ? found.text : "Votre CV est presque prêt...";
+    }
+
+    function startGenerationAnimation() {
+        overlay.style.display = "flex";
+        percentEl.textContent = "0%";
+        barEl.style.width = "0%";
+        messageEl.textContent = messages[0].text;
+
+        var startTime = performance.now();
+
+        function tick() {
+            var elapsed = (performance.now() - startTime) / 1000;
+            var p;
+
+            if (elapsed < 30)      p = (elapsed / 30) * 70;
+            else if (elapsed < 50) p = 70 + ((elapsed - 30) / 20) * 20;
+            else                   p = 90 + Math.min((elapsed - 50) / 100, 1) * 8;
+
+            p = Math.min(p, 98);
+            var pInt = Math.floor(p);
+
+            percentEl.textContent = pInt + "%";
+            barEl.style.width     = p + "%";
+            messageEl.textContent = getMessageForPercent(pInt);
+
+            animationFrame = requestAnimationFrame(tick);
+        }
+
+        animationFrame = requestAnimationFrame(tick);
+    }
+
+    function completeAnimation() {
+        cancelAnimationFrame(animationFrame);
+        percentEl.textContent = "100%";
+        barEl.style.width     = "100%";
+        messageEl.textContent = "CV généré avec succès ! ✓";
+    }
+
+    function resetForm() {
+        cancelAnimationFrame(animationFrame);
+        overlay.style.display  = "none";
+        submitBtn.disabled     = false;
+        submitBtn.innerText    = "Générer mon CV";
+    }
+
+    // ─────────────────────────────────────────────
+    // 7. FETCH AVEC TIMEOUT ET RETRY
+    // ─────────────────────────────────────────────
+
+    function fetchWithTimeout(url, options, timeoutMs) {
+        timeoutMs = timeoutMs || 120000;
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+
+        return fetch(url, Object.assign({}, options, { signal: controller.signal }))
+            .then(function (response) { clearTimeout(timer); return response; })
+            .catch(function (err)     { clearTimeout(timer); throw err; });
+    }
+
+    async function fetchWithRetry(url, options, maxRetries) {
+        maxRetries = maxRetries || 2;
+        var delays = [2000, 5000];
+
+        for (var attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                return await fetchWithTimeout(url, options, 120000);
+            } catch (err) {
+                if (attempt === maxRetries) {
+                    if (err.name === "AbortError")
+                        throw new Error("La génération a pris trop de temps. Veuillez réessayer.");
+                    if (!navigator.onLine)
+                        throw new Error("Pas de connexion internet. Vérifiez votre réseau.");
+                    throw new Error("Erreur réseau. Veuillez réessayer.");
+                }
+                await new Promise(function (r) { setTimeout(r, delays[attempt] || 5000); });
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // 8. SUBMIT
+    // ─────────────────────────────────────────────
+
+    if (submitBtn) {
+        submitBtn.addEventListener("click", async function (e) {
+            e.preventDefault();
+
+            // ✅ FIX CRITIQUE : forcer la synchro email juste avant le submit
+            // au cas où l'utilisateur aurait tapé sans appuyer sur +
+            if (emailAddresses.length === 0 && emailInput.value.trim()) {
+                addEmailAddress();
+            }
+            syncEmailHidden();
+
+            // Validation email obligatoire
+            if (emailAddresses.length === 0) {
+                emailInput.classList.add("is-invalid");
+                emailInput.focus();
+                return;
+            }
+
+            if (!validateStep(currentStep)) return;
+
+            submitBtn.disabled  = true;
+            submitBtn.innerText = "Génération en cours...";
+            startGenerationAnimation();
+
+            function onOffline() {
+                window.removeEventListener("offline", onOffline);
+                resetForm();
+                alert("❌ Connexion perdue. Vérifiez votre réseau et réessayez.");
+            }
+            window.addEventListener("offline", onOffline);
+
+            try {
+                var formData = new FormData(form);
+
+                var response = await fetchWithRetry(form.action, {
+                    method: form.method || "POST",
+                    body: formData
+                });
+
+                var bodyText = "";
+                try { bodyText = await response.text(); } catch {}
+
+                if (!response.ok) {
+                    var msg = bodyText.trim() || "Erreur inconnue.";
+                    if (response.status === 400)
+                        throw new Error("Données invalides : " + msg);
+                    else if (response.status === 500)
+                        throw new Error("Erreur serveur : " + msg);
+                    else
+                        throw new Error("Erreur " + response.status + " : " + msg);
+                }
+
+                var redirectUrl = response.headers.get("X-Redirect-Url");
+                if (!redirectUrl) {
+                    throw new Error("Redirection manquante. Détail : " + bodyText);
+                }
+
+                window.removeEventListener("offline", onOffline);
+                completeAnimation();
+
+                setTimeout(function () {
+                    window.location.href = redirectUrl;
+                }, 800);
+
+            } catch (error) {
+                window.removeEventListener("offline", onOffline);
+                resetForm();
+                console.error("Erreur lors de la génération :", error);
+                alert("❌ " + error.message);
+            }
+        });
+    }
+
+});
+
+</script>
+
+<style>
+    * { box-sizing: border-box; }
+
+    /* --- CHAMPS INVALIDES ---
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-color: rgba(220, 53, 69, 0.15) !important;
+        color: white !important;
+        -webkit-text-fill-color: white !important;
+    }
+
+    .is-invalid::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+        -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .hint {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.55);
+        font-style: italic;
+    }
+
+    .step { display: none; }
+
+    .step.active {
+        display: block;
+        animation: fadeIn 0.4s;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: rgba(128, 128, 128, 0.5) !important;
+        -webkit-text-fill-color: rgba(128, 128, 128, 0.5) !important;
+        opacity: 1 !important;
+    }
+
+    input::-webkit-input-placeholder,
+    textarea::-webkit-input-placeholder {
+        color: rgba(128, 128, 128, 0.5) !important;
+    }
+
+    /* ================================================================
+       EMAIL TAGS/CHIPS
+    ================================================================ */
+    .email-wrapper {
+        position: relative;
+        margin-bottom: 12px;
+    }
+
+    .email-tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+        min-height: 0;
+    }
+
+    .email-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(201, 168, 76, 0.15);
+        border: 1px solid rgba(201, 168, 76, 0.4);
+        border-radius: 100px;
+        padding: 6px 12px;
+        animation: tagAppear 0.2s ease;
+    }
+
+    @@keyframes tagAppear {
+        from { opacity: 0; transform: scale(0.85); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .email-tag-address {
+        color: #e8c97a;
+        font-size: 0.88rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .email-tag-remove {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        transition: all 0.15s ease;
+    }
+
+    .email-tag-remove:hover {
+        background: rgba(220, 53, 69, 0.3);
+        color: #ff6b6b;
+    }
+
+    .email-input-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .email-input-row input[type="email"] {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.07) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 8px !important;
+        color: white !important;
+        padding: 12px 14px !important;
+        font-size: 1rem;
+        -webkit-text-fill-color: white !important;
+        caret-color: #c9a84c;
+        width: 100%;
+    }
+
+    .email-input-row input[type="email"]::placeholder {
+        color: rgba(255, 255, 255, 0.4) !important;
+        -webkit-text-fill-color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    .email-input-row input[type="email"]:focus {
+        outline: none !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.2) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        -webkit-text-fill-color: #1a1a2e !important;
+    }
+
+    .add-email-btn {
+        flex-shrink: 0;
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid rgba(201, 168, 76, 0.4);
+        background: rgba(201, 168, 76, 0.1);
+        color: #c9a84c;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .add-email-btn:hover {
+        background: rgba(201, 168, 76, 0.25);
+        border-color: #c9a84c;
+        transform: scale(1.05);
+    }
+
+    .add-email-btn:active { transform: scale(0.95); }
+
+    .email-hint {
+        display: block;
+        color: rgba(255, 255, 255, 0.35);
+        font-size: 0.78rem;
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    /* ================================================================
+       TÉLÉPHONE — WRAPPER & TAGS
+    ================================================================ */
+    .phone-wrapper {
+        position: relative;
+        margin-bottom: 12px;
+        /* PAS d'overflow:hidden — laisserait cliper le dropdown
+           si on n'utilisait pas dropdownContainer:body */
+    }
+
+    .phone-tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+        min-height: 0;
+    }
+
+    .phone-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(201, 168, 76, 0.15);
+        border: 1px solid rgba(201, 168, 76, 0.4);
+        border-radius: 100px;
+        padding: 6px 12px;
+        animation: tagAppear 0.2s ease;
+    }
+
+    .phone-tag-number {
+        color: #e8c97a;
+        font-size: 0.88rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .phone-tag-remove {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        transition: all 0.15s ease;
+    }
+
+    .phone-tag-remove:hover {
+        background: rgba(220, 53, 69, 0.3);
+        color: #ff6b6b;
+    }
+
+    .phone-input-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* L'élément .iti généré par intl-tel-input prend tout l'espace dispo */
+    .phone-input-row .iti {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* ================================================================
+       intl-tel-input — CHAMP TEL
+    ================================================================ */
+    .iti {
+        width: 100% !important;
+        display: block !important;
+    }
+
+    .iti__flag-container {
+        cursor: pointer !important;
+    }
+
+    .iti__selected-flag {
+        cursor: pointer !important;
+        outline: none !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-radius: 8px 0 0 8px !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 0 8px 0 12px !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .iti__selected-flag:hover,
+    .iti__selected-flag:focus {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .iti__selected-dial-code {
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        margin-left: 6px !important;
+    }
+
+    .iti__arrow {
+        border-top-color: rgba(255, 255, 255, 0.5) !important;
+        margin-left: 6px !important;
+    }
+
+    .iti__arrow--up {
+        border-bottom-color: #c9a84c !important;
+        border-top-color: transparent !important;
+    }
+
+    .phone-wrapper input[type="tel"],
+    .iti input[type="tel"] {
+        width: 100% !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 8px !important;
+        color: white !important;
+        padding: 12px 14px 12px 90px !important;
+        font-size: 1rem !important;
+        -webkit-text-fill-color: white !important;
+        caret-color: #c9a84c !important;
+        box-sizing: border-box !important;
+        height: 48px !important;
+        line-height: 1.4 !important;
+    }
+
+    .phone-wrapper input[type="tel"]::placeholder {
+        color: rgba(255, 255, 255, 0.4) !important;
+        -webkit-text-fill-color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    .phone-wrapper input[type="tel"]:focus {
+        outline: none !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.2) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        -webkit-text-fill-color: white !important;
+    }
+
+    .phone-wrapper input[type="tel"]:-webkit-autofill,
+    .phone-wrapper input[type="tel"]:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 1000px #1a1a2e inset !important;
+        -webkit-text-fill-color: white !important;
+        caret-color: white !important;
+    }
+
+    /* ================================================================
+       DROPDOWN PAYS
+       RÈGLE ABSOLUE : ne jamais surcharger position / top / left /
+       bottom / width sur .iti__country-list quand dropdownContainer
+       est actif — intl-tel-input les calcule via getBoundingClientRect.
+       On stylise UNIQUEMENT l'apparence.
+    ================================================================ */
+    .iti__country-list {
+        background-color: #1a1a2e !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 12px !important;
+        max-height: 240px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        z-index: 99999 !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
+        list-style: none !important;
+        padding: 6px 0 !important;
+        margin: 0 !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(201, 168, 76, 0.4) transparent !important;
+        min-width: 260px !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .iti__country-list::-webkit-scrollbar { width: 4px; }
+    .iti__country-list::-webkit-scrollbar-track { background: transparent; }
+    .iti__country-list::-webkit-scrollbar-thumb {
+        background: rgba(201, 168, 76, 0.4);
+        border-radius: 100px;
+    }
+
+    .iti__country-list,
+    .iti__country-list li {
+        list-style: none !important;
+        list-style-type: none !important;
+    }
+
+    .iti__country {
+        padding: 10px 16px !important;
+        cursor: pointer !important;
+        transition: background 0.15s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .iti__country * { pointer-events: auto !important; }
+
+    .iti__country:hover,
+    .iti__country.iti__highlight {
+        background-color: rgba(201, 168, 76, 0.15) !important;
+    }
+
+    .iti__country-name {
+        color: white !important;
+        font-size: 0.9rem !important;
+    }
+
+    .iti__dial-code {
+        color: rgba(201, 168, 76, 0.8) !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        margin-left: auto !important;
+    }
+
+    .iti__divider {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        margin: 4px 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ================================================================
+       BOUTON AJOUTER TÉLÉPHONE
+    ================================================================ */
+    .add-phone-btn {
+        flex-shrink: 0;
+        width: 42px;
+        height: 48px;
+        border-radius: 10px;
+        border: 1px solid rgba(201, 168, 76, 0.4);
+        background: rgba(201, 168, 76, 0.1);
+        color: #c9a84c;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .add-phone-btn:hover {
+        background: rgba(201, 168, 76, 0.25);
+        border-color: #c9a84c;
+        transform: scale(1.05);
+    }
+
+    .add-phone-btn:active { transform: scale(0.95); }
+
+    .phone-hint {
+        display: block;
+        color: rgba(255, 255, 255, 0.35);
+        font-size: 0.78rem;
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    /* ================================================================
+       OVERLAY DE GÉNÉRATION
+    ================================================================ */
+    #generationOverlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .generation-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 48px 40px;
+        text-align: center;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .ai-spinner {
+        position: relative;
+        width: 100px; height: 100px;
+        margin: 0 auto 32px;
+    }
+
+    .spinner-ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        animation: spin linear infinite;
+    }
+
+    .spinner-ring.outer {
+        width: 100px; height: 100px;
+        top: 0; left: 0;
+        border-top-color: #c9a84c;
+        border-right-color: rgba(201, 168, 76, 0.3);
+        animation-duration: 1.5s;
+    }
+
+    .spinner-ring.middle {
+        width: 72px; height: 72px;
+        top: 14px; left: 14px;
+        border-top-color: #e8c97a;
+        border-left-color: rgba(232, 201, 122, 0.3);
+        animation-duration: 2s;
+        animation-direction: reverse;
+    }
+
+    .spinner-ring.inner {
+        width: 44px; height: 44px;
+        top: 28px; left: 28px;
+        border-top-color: #fff;
+        border-bottom-color: rgba(255, 255, 255, 0.2);
+        animation-duration: 1s;
+    }
+
+    .spinner-icon {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 18px;
+        color: #c9a84c;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
+    }
+
+    .generation-percent {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #c9a84c;
+        letter-spacing: -1px;
+        margin-bottom: 16px;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .generation-bar-container {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 100px;
+        height: 8px;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .generation-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #c9a84c, #e8c97a, #c9a84c);
+        background-size: 200% 100%;
+        border-radius: 100px;
+        width: 0%;
+        transition: width 0.3s ease;
+        animation: shimmer 2s linear infinite;
+    }
+
+    @@keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .generation-message {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 12px;
+        min-height: 28px;
+    }
+
+    .generation-submessage {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.45);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ================================================================
+       RESPONSIVE TABLETTE (768px)
+       Apparence uniquement — pas de position/top/left sur le dropdown
+    ================================================================ */
+    @@media (max-width: 768px) {
+        .iti__country-list {
+            min-width: 220px !important;
+            max-height: 220px !important;
+        }
+
+        .phone-wrapper input[type="tel"],
+        .iti input[type="tel"] {
+            padding: 12px 12px 12px 85px !important;
+            font-size: 15px !important;
+        }
+
+        .add-phone-btn { width: 44px; height: 48px; }
+        .add-email-btn { width: 44px; height: 44px; }
+    }
+
+    /* ================================================================
+       RESPONSIVE MOBILE (480px)
+       Apparence uniquement — pas de position/top/left sur le dropdown
+    ================================================================ */
+    @@media (max-width: 480px) {
+        .iti__country-list {
+            max-height: 200px !important;
+            min-width: 200px !important;
+            border-radius: 12px !important;
+            /* Scroll natif iOS fluide */
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            /* Masquer la scrollbar visuellement sur mobile */
+            scrollbar-width: none !important;
+        }
+
+        .iti__country-list::-webkit-scrollbar { display: none !important; }
+
+        .iti__country {
+            padding: 14px 18px !important;
+            min-height: 52px !important;
+        }
+
+        .iti__country-name { font-size: 15px !important; }
+        .iti__dial-code { font-size: 14px !important; }
+
+        .phone-wrapper input[type="tel"],
+        .iti input[type="tel"] {
+            padding: 14px 14px 14px 90px !important;
+            font-size: 16px !important;
+            height: 52px !important;
+        }
+
+        .iti__selected-dial-code { font-size: 0.85rem !important; }
+
+        .add-phone-btn { width: 46px; height: 52px; border-radius: 12px; }
+        .add-email-btn { width: 46px; height: 46px; border-radius: 12px; }
+
+        .phone-tag { padding: 8px 12px; }
+        .phone-tag-number { font-size: 0.85rem; }
+
+        .email-tag { padding: 8px 12px; }
+        .email-tag-address { font-size: 0.85rem; }
+
+        .email-input-row input[type="email"] {
+            padding: 14px !important;
+            font-size: 16px !important;
+            height: 52px !important;
+        }
+
+        .generation-card { padding: 36px 24px; border-radius: 20px; }
+        .ai-spinner { width: 80px; height: 80px; margin-bottom: 24px; }
+        .spinner-ring.outer { width: 80px; height: 80px; }
+        .spinner-ring.middle { width: 56px; height: 56px; top: 12px; left: 12px; }
+        .spinner-ring.inner { width: 34px; height: 34px; top: 23px; left: 23px; }
+        .spinner-icon { font-size: 14px; }
+        .generation-percent { font-size: 2.2rem; margin-bottom: 12px; }
+        .generation-bar-container { height: 6px; margin-bottom: 18px; }
+        .generation-message { font-size: 0.95rem; margin-bottom: 8px; }
+        .generation-submessage { font-size: 0.78rem; }
+    }
+</style>

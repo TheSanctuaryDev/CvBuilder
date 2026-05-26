@@ -1,0 +1,404 @@
+/* =============================================
+   CV – Sacha Dubois | Chargée de Projet
+   Palette :
+     Fond sidebar   : #fce4ec   (rose très pâle)
+     Fond main      : #ffffff
+     Rose vif       : #e91e8c   (nom Sacha, Formation)
+     Violet         : #7c3aed   (DUBOIS, Expérience, titres sidebar)
+     Texte foncé    : #2d2d2d
+     Texte gris     : #555555
+     Dot plein      : #e91e8c
+     Dot vide       : #f4c2d4
+     Fleur rose     : #f9a8d4 / #f472b6
+     Fleur violet   : #a78bda / #7c3aed
+   Font : Nunito
+   ============================================= */
+
+/* === RESET === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #f0d8e2;
+  font-family: "Nunito", sans-serif;
+  color: #2d2d2d;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ═══════════════════════════
+   CONTENEUR A4
+═══════════════════════════ */
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  background: #ffffff;
+}
+
+.cv-clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* ═══════════════════════════
+   SIDEBAR  35%
+═══════════════════════════ */
+.cv-sidebar {
+  float: left;
+  width: 35%;
+  height: 297mm;
+  background: #fce4ec;
+  padding: 4mm 5mm 6mm 5mm;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════
+   COLONNE DROITE  65%
+═══════════════════════════ */
+.cv-main {
+  float: left;
+  width: 65%;
+  height: 297mm;
+  background: #ffffff;
+  padding: 6mm 8mm 6mm 8mm;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════
+   FLEURS DÉCORATIVES
+═══════════════════════════ */
+.flower {
+  position: absolute;
+  z-index: 0;
+}
+
+/* Sidebar */
+.flower-top-left {
+  top: -10px;
+  left: -14px;
+  width: 70px;
+  height: 70px;
+}
+.flower-top-right {
+  top: -8px;
+  right: -10px;
+  width: 60px;
+  height: 60px;
+}
+.flower-bot-left {
+  bottom: 10px;
+  left: -12px;
+  width: 60px;
+  height: 60px;
+}
+
+/* Main – haut droite */
+.flower-main-tr-1 {
+  top: -8px;
+  right: 18px;
+  width: 58px;
+  height: 58px;
+}
+.flower-main-tr-2 {
+  top: -10px;
+  right: -10px;
+  width: 50px;
+  height: 50px;
+}
+
+/* Main – bas droite */
+.flower-main-br-1 {
+  bottom: 18px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+}
+.flower-main-br-2 {
+  bottom: 10px;
+  right: -8px;
+  width: 44px;
+  height: 44px;
+}
+
+/* ═══════════════════════════
+   PHOTO  (rectangle)
+═══════════════════════════ */
+.cv-photo-wrap {
+  position: relative;
+  z-index: 1;
+  width: 42mm;
+  height: 44mm;
+  margin: 10mm auto 5mm auto;
+  border-radius: 0;
+  overflow: hidden;
+  border: 3px solid #f9a8d4;
+}
+
+.cv-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* ═══════════════════════════
+   SECTIONS SIDEBAR
+═══════════════════════════ */
+.cv-section {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 4mm;
+}
+
+.cv-section-title {
+  font-size: 8pt;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7c3aed;
+  margin-bottom: 2.5mm;
+}
+
+/* ═══════════════════════════
+   CONTACT
+═══════════════════════════ */
+.cv-contact-item {
+  display: block;
+  margin-bottom: 1.8mm;
+}
+
+.cv-contact-icon {
+  display: inline-block;
+  width: 5mm;
+  font-size: 7pt;
+  color: #e91e8c;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.cv-contact-text {
+  font-size: 7pt;
+  font-weight: 500;
+  color: #2d2d2d;
+  vertical-align: middle;
+}
+
+/* ═══════════════════════════
+   LANGUES + DOTS
+═══════════════════════════ */
+.cv-lang-item {
+  display: block;
+  margin-bottom: 2mm;
+}
+
+.cv-lang-name {
+  display: inline-block;
+  font-size: 7.5pt;
+  font-weight: 600;
+  color: #2d2d2d;
+  width: 20mm;
+  vertical-align: middle;
+}
+
+.cv-lang-dots {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 2mm;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+.dot-full {
+  background: #e91e8c;
+}
+.dot-empty {
+  background: #f4c2d4;
+}
+
+.cv-lang-level {
+  display: inline-block;
+  font-size: 7pt;
+  font-weight: 700;
+  color: #7c3aed;
+  vertical-align: middle;
+}
+
+/* ═══════════════════════════
+   COMPÉTENCES / CENTRES
+═══════════════════════════ */
+.cv-skills-list {
+  list-style: disc;
+  padding-left: 4mm;
+  font-size: 7.5pt;
+  color: #2d2d2d;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.cv-skills-list li {
+  margin-bottom: 0.5mm;
+}
+
+/* ═══════════════════════════
+   HEADER MAIN – Nom & Titre
+═══════════════════════════ */
+.cv-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 5mm;
+  padding-top: 2mm;
+}
+
+.cv-name {
+  font-size: 26pt;
+  font-weight: 700;
+  color: #e91e8c;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.cv-name-last {
+  font-weight: 900;
+  color: #7c3aed;
+}
+
+.cv-job-title {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #7c3aed;
+  letter-spacing: 0.18em;
+  margin-top: 1mm;
+}
+
+/* ═══════════════════════════
+   SECTIONS PRINCIPALES
+═══════════════════════════ */
+.cv-main-section {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 4mm;
+}
+
+.cv-main-title {
+  font-size: 13pt;
+  font-weight: 800;
+  font-style: italic;
+  margin-bottom: 3mm;
+  letter-spacing: 0.01em;
+}
+
+.cv-main-title--pink {
+  color: #e91e8c;
+}
+.cv-main-title--purple {
+  color: #7c3aed;
+}
+
+/* ═══════════════════════════
+   FORMATION
+═══════════════════════════ */
+.cv-formation-item {
+  margin-bottom: 3mm;
+}
+
+.cv-formation-left {
+  float: left;
+  width: 72%;
+}
+
+.cv-formation-right {
+  float: right;
+  text-align: right;
+  width: 27%;
+}
+
+.cv-formation-degree {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #2d2d2d;
+  line-height: 1.3;
+}
+
+.cv-formation-school {
+  font-size: 7.5pt;
+  font-weight: 400;
+  color: #555555;
+  line-height: 1.4;
+}
+
+.cv-formation-date {
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+/* ═══════════════════════════
+   EXPÉRIENCE
+═══════════════════════════ */
+.cv-exp-item {
+  margin-bottom: 3.5mm;
+}
+
+.cv-exp-left {
+  float: left;
+  width: 64%;
+}
+
+.cv-exp-right {
+  float: right;
+  text-align: right;
+  width: 35%;
+}
+
+.cv-exp-role {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #2d2d2d;
+  line-height: 1.3;
+}
+
+.cv-exp-company {
+  font-size: 7.5pt;
+  font-weight: 400;
+  color: #555555;
+}
+
+.cv-exp-date {
+  font-size: 7.5pt;
+  font-weight: 700;
+  color: #7c3aed;
+  line-height: 1.4;
+}
+
+.cv-exp-list {
+  list-style: disc;
+  padding-left: 4mm;
+  font-size: 7.5pt;
+  color: #2d2d2d;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-top: 1.5mm;
+}
+
+.cv-exp-list li {
+  margin-bottom: 0.8mm;
+}

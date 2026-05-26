@@ -1,0 +1,161 @@
+/* Configuration A4 & Reset */
+* {
+  box-sizing: border-box;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto", sans-serif;
+  background-color: #f0f0f0;
+}
+
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: auto;
+  background: white;
+  overflow: hidden;
+}
+
+/* Sidebar - Bleu Canard */
+.sidebar {
+  width: 70mm;
+  height: 100%;
+  background-color: #3b7b8a;
+  color: white;
+  float: left;
+  padding: 20px;
+}
+
+.photo-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.photo-circle {
+  width: 130px;
+  height: 130px;
+  background-color: #eee;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  margin: 0 auto;
+}
+
+.sidebar-group {
+  margin-bottom: 25px;
+}
+
+.sidebar-group h3 {
+  font-size: 13pt;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.sidebar-group p,
+.sidebar-group li {
+  font-size: 9pt;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.sidebar-group ul {
+  padding-left: 15px;
+}
+
+.no-bullet {
+  list-style: none;
+  padding-left: 0 !important;
+}
+
+/* Main Content */
+.main-content {
+  width: 140mm;
+  height: 100%;
+  float: left;
+  padding: 25px 30px;
+}
+
+.main-header h1 {
+  color: #3b7b8a;
+  font-size: 28pt;
+  margin: 0;
+  text-align: center;
+}
+
+.objective {
+  color: #d9434e;
+  font-weight: bold;
+  font-size: 10.5pt;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.3;
+}
+
+.section-title {
+  background-color: #3b7b8a;
+  color: white;
+  padding: 5px 15px;
+  font-size: 14pt;
+  margin: 25px 0 15px 0;
+  border-radius: 2px;
+}
+
+/* Alignement Formation / Expérience */
+.item {
+  margin-bottom: 15px;
+  clear: both;
+  display: block;
+  font-size: 9.5pt;
+}
+
+.item-left {
+  width: 45mm;
+  float: left;
+  font-weight: bold;
+  color: #555;
+}
+
+.item-right {
+  margin-left: 45mm;
+  border-left: 1px solid #ddd;
+  padding-left: 15px;
+}
+
+.item-full {
+  width: 100%;
+}
+
+.sub-header {
+  font-weight: bold;
+  color: #3b7b8a;
+  font-size: 10.5pt;
+}
+
+.sub-info {
+  font-style: italic;
+  color: #666;
+  margin: 3px 0;
+}
+
+.task-list {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.task-list li {
+  margin-bottom: 3px;
+}
+
+/* Impression */
+@media print {
+  body {
+    background: none;
+  }
+  .cv-container {
+    margin: 0;
+  }
+}

@@ -1,0 +1,243 @@
+﻿@page "{id:int}"
+@model CvBuilderApp.Pages.PreviewModel
+@{
+    ViewData["Title"] = "Aperçu de votre CV";
+}
+
+<section class="preview-container">
+    <div class="header-actions">
+        <h1>Votre CV est prêt !</h1>
+        <p>Visualisez le rendu final avant de le télécharger en haute définition.</p>
+    </div>
+
+    @if (Model.Cv != null)
+    {
+        @* ── DESKTOP : iframe normale ── *@
+        <div class="preview-card shadow-lg desktop-only">
+            <iframe src="@Model.PdfUrl"
+                    width="100%"
+                    style="border: none; aspect-ratio: 1 / 1.414; min-height: 600px; border-radius: 8px;"
+                    loading="lazy">
+            </iframe>
+        </div>
+
+        @* ── MOBILE : miniature cliquable + bouton plein écran ── *@
+        <div class="mobile-only">
+            <div class="pdf-thumb-wrapper">
+                <iframe src="@Model.PdfUrl"
+                        class="pdf-thumb-iframe"
+                        scrolling="no"
+                        loading="lazy">
+                </iframe>
+                <div class="pdf-thumb-overlay" onclick="window.open('@Model.PdfUrl', '_blank')">
+                    <span class="thumb-icon">&#128065;</span>
+                    <span class="thumb-label">Appuyez pour voir en plein écran</span>
+                </div>
+            </div>
+
+            <a href="@Model.PdfUrl" target="_blank" class="btn-fullscreen-pdf">
+                &#128196; Voir le CV en plein écran
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Impossible de charger les données du CV.
+        </div>
+    }
+
+    <div class="actions-bar mt-4 d-flex justify-content-center gap-3">
+        @if (Model.Cv != null)
+        {
+            @* CV Premium non payé → bouton paiement *@
+            @if (Model.Cv.IsPremium && !Model.IsPaid)
+            {
+                <button class="btn btn-lg pay-btn"
+                        data-transaction-amount="1000"
+                        data-transaction-description="Déblocage CV Premium - @Model.Cv.FullName"
+                        data-currency-iso="XOF">
+                    <i class="bi bi-star-fill"></i> Payer 1000 FCFA pour télécharger sans filigranes
+                </button>
+            }
+            @* CV gratuit ou déjà payé → bouton téléchargement *@
+            else
+            {
+                <a asp-page-handler="DownloadPdf"
+                   asp-route-id="@Model.Cv.Id"
+                   class="btn btn-success btn-lg">
+                    <i class="bi bi-download"></i> Télécharger mon PDF
+                </a>
+            }
+
+            <a asp-page="/CvTemplate" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-plus-circle"></i> Créer un autre
+            </a>
+        }
+    </div>
+</section>
+
+<script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
+
+<script type="text/javascript">
+    FedaPay.init('.pay-btn', {
+        public_key: 'pk_live_q1GtvKBmx9GhcyCl5bEHe6HS',
+        // ✅ CORRECTION : onComplete reçoit { reason, transaction } et NON pas directement le statut
+        onComplete: function (object) {
+            // FedaPay.CHECKOUT_COMPLETED = paiement finalisé (peu importe succès ou échec)
+            // On vérifie en plus que le statut de la transaction est bien 'approved'
+            if (object.reason === FedaPay.CHECKOUT_COMPLETED && object.transaction.status === 'approved') {
+                window.location.href = '?handler=ConfirmPayment&id=@Model.Cv?.Id&transactionId=' + object.transaction.id;
+            }
+        }
+    });
+
+    @if (Model.TriggerAutoDownload)
+    {
+        <text>
+        window.onload = function () {
+            setTimeout(function () {
+                window.location.href = '@Url.Page("/Preview", "DownloadPdf", new { id = Model.Cv?.Id })';
+            }, 1000);
+        };
+        </text>
+    }
+</script>
+
+<style>
+    .preview-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .preview-card {
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .desktop-only { display: block; }
+    .mobile-only  { display: none;  }
+
+    @@media (max-width: 768px) {
+        .desktop-only { display: none;  }
+        .mobile-only  { display: block; }
+    }
+
+    .pdf-thumb-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 340px;
+        margin: 0 auto 16px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        aspect-ratio: 1 / 1.414;
+        background: #fff;
+    }
+
+    .pdf-thumb-iframe {
+        width: 200%;
+        height: 200%;
+        transform: scale(0.5);
+        transform-origin: top left;
+        border: none;
+        pointer-events: none;
+    }
+
+    .pdf-thumb-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.38);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+        .pdf-thumb-overlay:active {
+            background: rgba(0,0,0,0.55);
+        }
+
+    .thumb-icon  { font-size: 2rem; }
+
+    .thumb-label {
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+
+    .btn-fullscreen-pdf {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 auto 8px;
+        padding: 13px 28px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #C9A95C, #a8873d);
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(201,169,92,0.4);
+        transition: all 0.3s ease;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+        .btn-fullscreen-pdf:hover,
+        .btn-fullscreen-pdf:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201,169,92,0.55);
+            color: #fff;
+        }
+
+    .actions-bar .btn {
+        padding: 12px 25px;
+        font-weight: 600;
+        border-radius: 8px;
+        touch-action: manipulation;
+    }
+
+    @@media (max-width: 768px) {
+        .actions-bar {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .actions-bar .btn,
+        .actions-bar a {
+            width: 100%;
+            max-width: 340px;
+        }
+    }
+
+    .pay-btn {
+        background: linear-gradient(135deg, #D4AF37 0%, #C49B28 100%);
+        border: 1px solid #B8860B;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+        transition: all 0.3s ease;
+        padding: 12px 25px;
+        font-weight: 700;
+        border-radius: 8px;
+        touch-action: manipulation;
+    }
+
+        .pay-btn:hover {
+            background: linear-gradient(135deg, #FFD700 0%, #D4AF37 100%);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+            border-color: #FFD700;
+        }
+</style>

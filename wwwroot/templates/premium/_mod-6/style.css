@@ -1,0 +1,359 @@
+/* === RESET === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #e8e8e8;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* === CV CONTAINER A4 === */
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: auto;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  background: #ffffff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+/* ===========================
+   SIDEBAR
+=========================== */
+.cv-sidebar {
+  width: 68mm;
+  min-width: 68mm;
+  height: 297mm;
+  background: #d6d9c8;
+  padding: 10mm 7mm 8mm 7mm;
+  overflow: hidden;
+}
+
+/* Photo */
+.cv-sidebar__photo-wrap {
+  width: 38mm;
+  height: 38mm;
+  margin: 0 auto 5mm auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #b8bba8;
+}
+
+.cv-sidebar__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Title block */
+.cv-sidebar__title-block {
+  margin-bottom: 6mm;
+}
+
+.cv-sidebar__name {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 800;
+  font-size: 26pt;
+  color: #1a1a1a;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.cv-sidebar__brand {
+  font-size: 8pt;
+  color: #555555;
+  margin-top: 2px;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* Section generic */
+.cv-sidebar__section {
+  margin-bottom: 5mm;
+}
+
+.cv-sidebar__section-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.cv-sidebar__section-title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 9pt;
+  color: #2a2a2a;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.cv-sidebar__section-icon {
+  font-size: 10pt;
+  color: #2a2a2a;
+}
+
+.cv-sidebar__sep {
+  height: 1px;
+  background: #9a9d8c;
+  margin-bottom: 4px;
+}
+
+/* Contact */
+.cv-sidebar__contact-item {
+  margin-bottom: 3px;
+}
+
+.cv-sidebar__contact-label {
+  font-size: 8pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.3;
+}
+
+.cv-sidebar__contact-value {
+  font-size: 8pt;
+  color: #1a1a1a;
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.3;
+}
+
+/* Profil text */
+.cv-sidebar__profil-text {
+  font-size: 7.8pt;
+  color: #1a1a1a;
+  line-height: 1.45;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* ===========================
+   MAIN
+=========================== */
+.cv-main {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  height: 297mm;
+  padding: 8mm 8mm 6mm 7mm;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* Section */
+.cv-main__section {
+  margin-bottom: 4mm;
+}
+
+.cv-main__section--last {
+  margin-bottom: 0;
+}
+
+.cv-main__section-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.cv-main__section-title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 9pt;
+  color: #8b9a6b;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.cv-main__section-icon {
+  font-size: 11pt;
+  color: #8b9a6b;
+}
+
+.cv-main__sep {
+  height: 1px;
+  background: #c0c0c0;
+  margin-bottom: 4px;
+}
+
+/* ===========================
+   TIMELINE ENTRY
+=========================== */
+.cv-main__entry {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.cv-main__entry--last {
+  margin-bottom: 0;
+}
+
+/* Date column */
+.cv-main__entry-date {
+  width: 20mm;
+  min-width: 20mm;
+  font-size: 7.5pt;
+  color: #555555;
+  line-height: 1.4;
+  padding-top: 1px;
+  padding-right: 3mm;
+  text-align: right;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+/* Dot + line column */
+.cv-main__entry-dot-col {
+  width: 8mm;
+  min-width: 8mm;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.cv-main__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #8b9a6b;
+  background: #ffffff;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.cv-main__dot-line {
+  width: 1px;
+  background: #8b9a6b;
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  margin-top: 2px;
+  min-height: 4mm;
+}
+
+/* Content */
+.cv-main__entry-content {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  padding-bottom: 4mm;
+  padding-left: 2mm;
+}
+
+.cv-main__entry--last .cv-main__entry-content {
+  padding-bottom: 0;
+}
+
+.cv-main__entry-company {
+  font-family: "Montserrat", sans-serif;
+  font-size: 8.2pt;
+  font-weight: 600;
+  color: #8b9a6b;
+  line-height: 1.3;
+  margin-bottom: 1px;
+}
+
+.cv-main__entry-job {
+  font-family: "Open Sans", sans-serif;
+  font-size: 8.2pt;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+/* Lists with square bullets */
+.cv-main__entry-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.cv-main__entry-list li {
+  font-size: 7.8pt;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 2px;
+  padding-left: 10px;
+  position: relative;
+}
+
+.cv-main__entry-list li::before {
+  content: "▪";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 8pt;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+
+/* Round bullet variant (formation modules) */
+.cv-main__entry-list--round li::before {
+  content: "•";
+  font-size: 10pt;
+  line-height: 1.2;
+}
+
+/* Competences list */
+.cv-main__competences-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 2px;
+}
+
+.cv-main__competences-list li {
+  font-size: 8pt;
+  color: #1a1a1a;
+  line-height: 1.45;
+  margin-bottom: 2px;
+  padding-left: 12px;
+  position: relative;
+}
+
+.cv-main__competences-list li::before {
+  content: "▪";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 8pt;
+  color: #1a1a1a;
+  line-height: 1.45;
+}

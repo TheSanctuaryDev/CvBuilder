@@ -1,0 +1,250 @@
+/* === RESET === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #e0e0e0;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* === CV CONTAINER A4 === */
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: auto;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  background: #ffffff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+/* ===========================
+   SIDEBAR
+=========================== */
+.cv-sidebar {
+  width: 67mm;
+  min-width: 67mm;
+  height: 297mm;
+  background: #4a7bad;
+  overflow: hidden;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+/* === HEADER NAME BAND === */
+.cv-sidebar__header {
+  background: #2e5580;
+  padding: 7px 10px 7px 10px;
+  min-height: 34px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.cv-sidebar__name {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 700;
+  font-size: 10.5pt;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+/* === PHOTO === */
+.cv-sidebar__photo-wrap {
+  width: 43mm;
+  height: 43mm;
+  margin: 8mm auto 6mm auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #ffffff;
+}
+
+.cv-sidebar__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* === SIDEBAR SECTIONS === */
+.cv-sidebar__section {
+  padding: 0 8mm;
+  margin-bottom: 5mm;
+}
+
+.cv-sidebar__section-title {
+  font-family: "Libre Baskerville", serif;
+  font-weight: 400;
+  font-size: 13pt;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 3px;
+}
+
+.cv-sidebar__sep {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.5);
+  margin-bottom: 5px;
+}
+
+/* Info list */
+.cv-sidebar__info-list {
+  list-style: none;
+  padding: 0;
+}
+
+.cv-sidebar__info-list li {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  margin-bottom: 5px;
+}
+
+.cv-sidebar__info-icon {
+  width: 16px;
+  min-width: 16px;
+  text-align: center;
+  color: #ffffff;
+  font-size: 9pt;
+  margin-right: 7px;
+  margin-top: 1px;
+}
+
+.cv-sidebar__info-text {
+  font-size: 8pt;
+  color: #ffffff;
+  line-height: 1.4;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* Skill / language text */
+.cv-sidebar__skill-text {
+  font-size: 8.2pt;
+  color: #ffffff;
+  line-height: 1.5;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* ===========================
+   MAIN
+=========================== */
+.cv-main {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  height: 297mm;
+  padding: 8mm 9mm 6mm 9mm;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* === SECTION === */
+.cv-main__section {
+  margin-bottom: 5mm;
+}
+
+.cv-main__section-title {
+  font-family: "Libre Baskerville", serif;
+  font-weight: 400;
+  font-size: 14pt;
+  color: #3d6b9a;
+  margin-bottom: 3px;
+  line-height: 1.2;
+}
+
+.cv-main__sep {
+  height: 1px;
+  background: #c8c8c8;
+  margin-bottom: 5px;
+}
+
+/* Profil text */
+.cv-main__profil-text {
+  font-size: 8.5pt;
+  color: #1a1a1a;
+  line-height: 1.55;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* === ENTRY === */
+.cv-main__entry {
+  margin-bottom: 4mm;
+}
+
+.cv-main__entry-top {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-box-align: baseline;
+  -ms-flex-align: baseline;
+  align-items: baseline;
+  margin-bottom: 1px;
+}
+
+.cv-main__entry-job {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 700;
+  font-size: 8.8pt;
+  color: #1a1a1a;
+}
+
+.cv-main__entry-date {
+  font-family: "Open Sans", sans-serif;
+  font-size: 8.2pt;
+  font-weight: 600;
+  font-style: italic;
+  color: #3d6b9a;
+  white-space: nowrap;
+  margin-left: 5px;
+}
+
+.cv-main__entry-company {
+  font-size: 8.2pt;
+  color: #4a7bad;
+  font-family: "Open Sans", sans-serif;
+  margin-bottom: 3px;
+}
+
+/* Lists with round bullets */
+.cv-main__entry-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.cv-main__entry-list li {
+  font-size: 8.2pt;
+  color: #1a1a1a;
+  line-height: 1.45;
+  margin-bottom: 1px;
+  padding-left: 14px;
+  position: relative;
+  font-family: "Open Sans", sans-serif;
+}
+
+.cv-main__entry-list li::before {
+  content: "●";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 7pt;
+  color: #1a1a1a;
+  line-height: 1.55;
+}

@@ -1,0 +1,223 @@
+/* === RESET & BASE === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #525659;
+  font-family: "Montserrat", sans-serif;
+  color: #333;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  background: white;
+  margin: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+/* === HEADER === */
+.cv-header {
+  height: 200px;
+  padding: 40px 60px;
+  background: #fff;
+  position: relative;
+}
+
+.header-photo {
+  float: left;
+  width: 140px;
+  height: 140px;
+  background: #eee;
+}
+
+.header-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.header-info {
+  margin-left: 200px;
+  padding-top: 10px;
+}
+
+.header-info h1 {
+  font-size: 52px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: -1px;
+  margin-bottom: 5px;
+}
+
+.header-info h2 {
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: 5px;
+  color: #1a1a1b;
+  margin-bottom: 10px;
+}
+
+.header-info .rpps {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* === CONTACT BAR === */
+.contact-bar {
+  clear: both;
+  background: #1a1a1b;
+  color: white;
+  height: 50px;
+  padding: 0 60px;
+  display: table;
+  width: 100%;
+  border-radius: 30px 0 0 30px; /* Effet de bordure à gauche visible sur l'image */
+  margin-left: 30px;
+}
+
+.contact-item {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 14px;
+  text-align: center;
+}
+
+.contact-item i {
+  margin-right: 10px;
+}
+
+/* === BODY STRUCTURE === */
+.cv-body {
+  height: 100%;
+  padding-top: 20px;
+}
+
+.cv-sidebar {
+  float: left;
+  width: 32%;
+  background: #1a1a1b;
+  height: calc(297mm - 250px);
+  color: white;
+  padding: 40px 30px;
+}
+
+.cv-main {
+  float: left;
+  width: 68%;
+  padding: 40px 40px;
+}
+
+/* === SECTIONS TYPOGRAPHY === */
+.cv-sidebar h3 {
+  font-size: 24px;
+  text-transform: none;
+  letter-spacing: 2px;
+  border-bottom: 1px solid white;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.cv-main h3 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #444;
+  border-bottom: 2px solid #1a1a1b;
+  padding-bottom: 5px;
+  margin-bottom: 25px;
+  text-transform: none;
+}
+
+/* === SIDEBAR CONTENT === */
+.sidebar-section {
+  margin-bottom: 40px;
+}
+
+.pub-item {
+  margin-bottom: 20px;
+}
+
+.pub-item h4 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sidebar-section .date {
+  font-size: 12px;
+  display: block;
+  margin: 5px 0;
+}
+
+.cv-sidebar ul {
+  list-style: none;
+  margin-top: 10px;
+}
+
+.cv-sidebar ul li {
+  font-size: 12px;
+  margin-bottom: 10px;
+  position: relative;
+  padding-left: 15px;
+  line-height: 1.4;
+}
+
+.cv-sidebar ul li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+}
+
+/* === MAIN CONTENT === */
+.main-section {
+  margin-bottom: 40px;
+}
+
+.exp-item {
+  margin-bottom: 25px;
+}
+
+.item-header {
+  display: table;
+  width: 100%;
+}
+
+.item-header strong {
+  display: table-cell;
+  font-size: 18px;
+  color: #1a1a1b;
+}
+
+.item-header .date {
+  display: table-cell;
+  text-align: right;
+  font-size: 14px;
+}
+
+.subtitle {
+  font-size: 14px;
+  font-style: italic;
+  margin: 5px 0;
+  color: #666;
+}
+
+.description {
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: justify;
+  color: #333;
+}
+
+/* Clearfix pour le float */
+.cv-body::after {
+  content: "";
+  display: table;
+  clear: both;
+}

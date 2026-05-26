@@ -1,0 +1,195 @@
+/* Configuration de base pour l'impression A4 */
+@page {
+  size: A4;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica", "Arial", sans-serif;
+  color: #333;
+  line-height: 1.4;
+  background-color: #ffffff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: auto;
+  padding: 15mm 20mm;
+  box-sizing: border-box;
+  position: relative;
+  background-color: #ffffff;
+}
+
+/* HEADER */
+.header {
+  display: block;
+  width: 100%;
+  margin-bottom: 25px;
+  clear: both;
+}
+
+.header-photo {
+  float: left;
+  width: 110px;
+  height: 130px;
+  background-color: #eee;
+}
+
+.header-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.header-info {
+  float: left;
+  margin-left: 30px;
+}
+
+.name {
+  font-size: 26pt;
+  color: #1a4a7c;
+  margin: 0 0 15px 0;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.info-table {
+  border-collapse: collapse;
+  font-size: 9.5pt;
+}
+
+.info-table td {
+  padding: 2px 0;
+}
+
+.info-table td.label {
+  font-weight: bold;
+  width: 80px;
+}
+
+/* SECTIONS */
+.section {
+  clear: both;
+  margin-top: 20px;
+  position: relative;
+}
+
+.section-title {
+  font-size: 13pt;
+  color: #1a4a7c;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+  padding-left: 15px;
+  border-left: 4px solid #1a4a7c; /* La barre bleue caractéristique */
+}
+
+.section-content {
+  font-size: 10pt;
+  padding-left: 19px;
+  text-align: justify;
+}
+
+/* ITEMS (Expérience & Education) */
+.experience-item,
+.edu-item {
+  margin-bottom: 15px;
+  padding-left: 19px;
+}
+
+.item-header {
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.item-header .title {
+  font-weight: bold;
+  font-size: 10.5pt;
+  color: #000;
+}
+
+.item-header .date {
+  float: right;
+  font-size: 9pt;
+  color: #666;
+}
+
+.subtitle {
+  font-size: 9.5pt;
+  color: #555;
+  font-style: italic;
+  margin: 2px 0;
+}
+
+/* LISTES */
+.bullet-list {
+  margin: 5px 0 0 0;
+  padding-left: 18px;
+  list-style-type: disc;
+}
+
+.bullet-list li {
+  font-size: 9.5pt;
+  margin-bottom: 3px;
+  color: #444;
+}
+
+/* FIX POUR TABLEAUX ET FLOATS */
+.section::after,
+.header::after,
+.item-header::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Réglages pour "Autres" */
+.section:last-of-type p {
+  margin: 8px 0;
+  font-size: 9.5pt;
+}
+
+/* --- Style mis à jour pour les titres de sections --- */
+
+.section-title {
+  font-size: 13pt;
+  color: #1a4a7c;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 0 0 15px 0;
+  padding-left: 15px;
+  border-left: 4px solid #1a4a7c; /* La barre bleue verticale */
+
+  /* On prépare le titre pour contenir la ligne grise */
+  display: block;
+  overflow: hidden; /* Empêche la ligne de déborder */
+  position: relative;
+}
+
+.section-title::after {
+  content: "";
+  display: inline-block;
+  height: 1px;
+  background-color: #d1d1d1; /* Gris clair pour la ligne horizontale */
+  vertical-align: middle;
+  width: 100%; /* La ligne prend tout l'espace restant */
+  margin-left: 15px; /* Espacement entre le texte et la barre */
+  position: absolute;
+  top: 55%; /* Centre la barre verticalement par rapport au texte */
+}
+
+/* --- Ajustement du contenu pour plus de clarté --- */
+
+.section-content,
+.experience-item,
+.edu-item {
+  padding-left: 19px; /* Alignement parfait sous le texte du titre */
+  margin-top: 5px;
+}

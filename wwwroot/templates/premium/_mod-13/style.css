@@ -1,0 +1,248 @@
+/* ===================================================
+   CV – JASMINE CLEDANOR
+   Template: Classic single-column, serif, A4
+   Optimised for: wkhtmltopdf + Playwright screenshot
+   =================================================== */
+
+/* === RESET === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #e8e8e8;
+  font-family: "Libre Baskerville", "Georgia", serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* === A4 CONTAINER === */
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: auto;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  background: #ffffff;
+  padding: 14mm 18mm 10mm 18mm;
+}
+
+/* === HEADER === */
+.cv-header {
+  text-align: center;
+  margin-bottom: 6pt;
+}
+
+.cv-header__name {
+  font-family: "EB Garamond", "Georgia", serif;
+  font-size: 28pt;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+  color: #000000;
+  line-height: 1.1;
+  /* Small-caps effect: first letter caps + rest small caps */
+  font-variant: small-caps;
+  margin-bottom: 4pt;
+}
+
+.cv-header__contact {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 9pt;
+  color: #1a1a1a;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  margin-bottom: 5pt;
+}
+
+.cv-header__divider {
+  border: none;
+  border-top: 1.5pt solid #000000;
+  margin-top: 3pt;
+}
+
+/* === SECTIONS === */
+.cv-section {
+  margin-top: 8pt;
+  margin-bottom: 0;
+}
+
+.cv-section__title {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 9.5pt;
+  font-weight: 700;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2pt;
+}
+
+.cv-section__divider {
+  border: none;
+  border-top: 1pt solid #000000;
+  margin-bottom: 5pt;
+}
+
+.cv-section__text {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 8.8pt;
+  color: #1a1a1a;
+  line-height: 1.55;
+  text-align: justify;
+}
+
+/* === ENTRIES (Education / Experience) === */
+.cv-entry {
+  margin-bottom: 4pt;
+}
+
+.cv-entry--spaced {
+  margin-top: 5pt;
+}
+
+.cv-entry__header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-box-align: baseline;
+  -ms-flex-align: baseline;
+  align-items: baseline;
+  width: 100%;
+}
+
+.cv-entry__title {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 9pt;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.3;
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+.cv-entry__date {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 9pt;
+  font-weight: 400;
+  color: #000000;
+  white-space: nowrap;
+  margin-left: 8pt;
+}
+
+.cv-entry__subtitle {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 8.8pt;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin-bottom: 2pt;
+  line-height: 1.3;
+}
+
+.cv-entry__body {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 8.8pt;
+  color: #1a1a1a;
+  line-height: 1.5;
+  text-align: justify;
+  margin-bottom: 1pt;
+}
+
+/* === LISTS === */
+.cv-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 2pt 0;
+}
+
+.cv-list li {
+  font-family: "Libre Baskerville", "Georgia", serif;
+  font-size: 8.8pt;
+  color: #1a1a1a;
+  line-height: 1.5;
+  padding-left: 14pt;
+  position: relative;
+  margin-bottom: 1.5pt;
+  text-align: justify;
+}
+
+.cv-list li::before {
+  content: "\2022";
+  position: absolute;
+  left: 4pt;
+  top: 0;
+  color: #000000;
+  font-size: 9pt;
+}
+
+/* Nested list */
+.cv-list--nested {
+  margin-top: 1.5pt;
+  margin-bottom: 1.5pt;
+  padding-left: 0;
+}
+
+.cv-list--nested li {
+  padding-left: 14pt;
+  font-size: 8.8pt;
+}
+
+.cv-list--nested li::before {
+  content: "\2022";
+  left: 4pt;
+}
+
+/* Skills lists (no justify, normal flow) */
+.cv-list--skills li {
+  text-align: left;
+  margin-bottom: 1pt;
+  line-height: 1.55;
+}
+
+/* === SKILLS GRID (2 columns) === */
+.cv-skills-grid {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 0;
+  width: 100%;
+}
+
+.cv-skills-grid .cv-list--skills {
+  width: 50%;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding-right: 4pt;
+}
+
+/* === TECHNICAL SKILLS GRID (4 columns) === */
+.cv-tech-grid {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 0;
+  width: 100%;
+}
+
+.cv-tech-grid .cv-list--skills {
+  width: 25%;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  padding-right: 4pt;
+}

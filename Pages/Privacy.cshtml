@@ -1,0 +1,63 @@
+﻿@page
+@model PrivacyModel
+@{
+    ViewData["Title"] = "Politique de confidentialité & Contact – CvBuilderApp";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p><strong>1. Introduction</strong><br>Bienvenue sur CvBuilderApp. La protection de vos données personnelles est une priorité. Cette politique explique quelles informations nous collectons et comment elles sont utilisées.<br><br>En utilisant notre service, vous acceptez cette politique.<br><br><strong>2. Données collectées</strong><br><br><strong>2.1 Données fournies par l'utilisateur</strong><br>Lors de la création de votre CV, nous collectons uniquement les informations que vous saisissez :<br>- Prénom et nom<br>- Adresse e-mail (si fournie)<br>- Numéro de téléphone<br>- Informations professionnelles (expérience, formation, compétences)<br>- Photo (optionnelle)<br><br>Ces données sont utilisées uniquement pour générer votre CV.<br><br><strong>2.2 Données collectées automatiquement</strong><br>- Adresse IP<br>- Type de navigateur<br>- Données de navigation (pages consultées, durée)<br>- Cookies<br><br><strong>3. Utilisation des données</strong><br>Les données collectées sont utilisées uniquement pour :<br>- Générer votre CV<br>- Améliorer le service<br>- Assurer le bon fonctionnement de la plateforme<br>- Traiter les paiements<br><br><strong>4. Partage des données</strong><br>Nous ne vendons aucune donnée personnelle.<br><br>Certaines données peuvent être traitées par :<br>- Les services d'hébergement<br>- Les services de paiement sécurisé<br>- Les outils techniques nécessaires au fonctionnement de l'application<br><br><strong>5. Sécurité des données</strong><br>Nous mettons en place des mesures de sécurité pour protéger vos informations contre :<br>- Les accès non autorisés<br>- La perte ou l'altération des données<br><br><strong>6. Conservation des données</strong><br>Les données saisies peuvent être temporairement stockées pour permettre la génération et le téléchargement de votre CV.<br><br>Elles ne sont pas conservées de manière permanente, sauf lorsque cela est techniquement nécessaire.<br><br><strong>7. Paiement et politique de non-remboursement</strong><br>Les paiements effectués sur CvBuilderApp donnent accès aux fonctionnalités premium, notamment le téléchargement du CV.<br><br><strong>Une fois le paiement effectué, aucun remboursement ne sera accordé.</strong><br><br>En effectuant un paiement, vous acceptez expressément cette condition.<br><br><strong>8. Cookies</strong><br>Nous utilisons des cookies pour :<br>- Améliorer l'expérience utilisateur<br>- Analyser l'utilisation du site<br><br>Vous pouvez désactiver les cookies via les paramètres de votre navigateur.<br><br><strong>9. Modifications</strong><br>Cette politique peut être modifiée à tout moment. La version mise à jour sera publiée sur cette page.</p>
+<h5><strong>Dernière mise à jour : Avril 2026</strong></h5>
+
+<div class="cv-contact-container">
+    <form id="contact-form" class="cv-contact-form">
+        <h3>Contact d'urgence</h3>
+        <p>Laissez-nous un message.</p>
+
+        <div class="input-group">
+            <label>Nom complet</label>
+            <input type="text" id="user_name" name="user_name" placeholder="Jean Dupont" required />
+        </div>
+
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="user_email" name="user_email" placeholder="jean@example.com" required />
+        </div>
+
+        <div class="input-group">
+            <label>Numéro de téléphone</label>
+            <input type="tel" id="user_phone" name="user_phone" placeholder="06 12 34 56 78" />
+        </div>
+
+        <div class="input-group">
+            <label>Message d'urgence</label>
+            <textarea id="message" name="message" rows="4" placeholder="Décrivez votre problème ici..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-send" id="button-send">Envoyer la demande</button>
+    </form>
+</div>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@@emailjs/browser@@3/dist/email.min.js"></script>
+
+<script type="text/javascript">
+    (function() {
+    emailjs.init("J4LF2fobdgOu5MvW5");
+    })();
+
+    document.getElementById('contact-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const btn = document.getElementById('button-send');
+    btn.innerText = 'Envoi en cours...';
+
+    emailjs.sendForm('service_4ebuk8c', 'template_p0blz8a', this)
+    .then(function() {
+    alert('Message envoyé avec succès !');
+    btn.innerText = 'Envoyer la demande';
+    document.getElementById('contact-form').reset();
+    }, function(error) {
+    alert('Échec de l\'envoi... ' + JSON.stringify(error));
+    btn.innerText = 'Réessayer';
+    });
+    });
+</script>

@@ -1,0 +1,273 @@
+/* === RESET === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #f0f0f0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+  min-height: 100vh;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* === CV CONTAINER A4 === */
+.cv-container {
+  width: 210mm;
+  height: 297mm;
+  margin: auto;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  background: #ffffff;
+  padding: 0;
+}
+
+/* === HEADER === */
+.cv-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 14mm 14mm 8mm 14mm;
+  position: relative;
+}
+
+.cv-header__photo-wrap {
+  width: 42mm;
+  height: 42mm;
+  min-width: 42mm;
+  overflow: hidden;
+  border: 3px solid #dddddd;
+  border-radius: 50%;
+  margin-right: 14mm;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+}
+
+.cv-header__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.cv-header__title-wrap {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  text-align: center;
+}
+
+.cv-header__title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 800;
+  font-size: 38pt;
+  color: #c0392b;
+  letter-spacing: 4px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.cv-header__subtitle {
+  font-family: "Open Sans", sans-serif;
+  font-size: 10pt;
+  color: #555555;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* === RED SEPARATOR LINE === */
+.cv-header__line {
+  height: 2px;
+  background: #c0392b;
+  margin: 0 14mm;
+}
+
+/* === BODY === */
+.cv-body {
+  padding: 0 14mm;
+}
+
+/* === LAYOUT ROW (PROFIL + CONTACT) === */
+.cv-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+}
+
+.cv-row--top {
+  margin-top: 5mm;
+}
+
+.cv-col--left {
+  width: 58%;
+  padding-right: 8mm;
+}
+
+.cv-col--right {
+  width: 42%;
+}
+
+/* === SECTION BASE === */
+.cv-section {
+  margin-top: 4mm;
+}
+
+.cv-section--full {
+  width: 100%;
+}
+
+.cv-section__title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 9.5pt;
+  color: #c0392b;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.cv-section__line {
+  height: 1px;
+  background: #cccccc;
+  margin-bottom: 4px;
+}
+
+.cv-section__text {
+  font-size: 8.2pt;
+  color: #1a1a1a;
+  line-height: 1.45;
+}
+
+/* === CONTACT === */
+.cv-contact__list {
+  list-style: none;
+  margin-top: 3px;
+}
+
+.cv-contact__item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 8.5pt;
+  color: #1a1a1a;
+}
+
+.cv-contact__icon {
+  width: 18px;
+  text-align: center;
+  color: #c0392b;
+  margin-right: 7px;
+  font-size: 10pt;
+}
+
+.cv-contact__text {
+  font-size: 8.5pt;
+}
+
+/* === COMPÉTENCES === */
+.cv-competences {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+  margin-top: 2px;
+}
+
+.cv-competences__col {
+  width: 50%;
+  list-style: none;
+  padding-left: 0;
+}
+
+.cv-competences__col li {
+  font-size: 8.2pt;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 2px;
+  padding-left: 12px;
+  position: relative;
+}
+
+.cv-competences__col li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #1a1a1a;
+  font-size: 8pt;
+  line-height: 1.4;
+}
+
+/* === FORMATION / EXPÉRIENCE ENTRIES === */
+.cv-entry {
+  margin-bottom: 4mm;
+}
+
+.cv-entry__title {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 700;
+  font-size: 8.5pt;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.cv-entry__subtitle {
+  font-size: 8.2pt;
+  color: #777777;
+  margin-bottom: 2px;
+  font-style: italic;
+}
+
+.cv-entry__note {
+  font-size: 8.2pt;
+  color: #1a1a1a;
+  margin-top: 2px;
+}
+
+.cv-entry__list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 2px;
+}
+
+.cv-entry__list li {
+  font-size: 8.2pt;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 2px;
+  padding-left: 12px;
+  position: relative;
+}
+
+.cv-entry__list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #1a1a1a;
+  font-size: 8pt;
+  line-height: 1.4;
+}

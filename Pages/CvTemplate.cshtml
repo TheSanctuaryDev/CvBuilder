@@ -1,0 +1,66 @@
+﻿@page
+@model CvBuilderApp.Pages.CvTemplateModel
+@{
+    ViewData["Title"] = "Choisissez votre design";
+}
+
+<section class="template-section">
+    <div class="template-header">
+        <h1>Choisissez votre <span>modèle de CV</span></h1>
+        <p>Sélectionnez un design pour commencer la personnalisation</p>
+    </div>
+
+    <div class="template-grid">
+        @foreach (var template in Model.TemplatesList)
+        {
+            @* Les attributs data- sont cruciaux pour le transfert vers le Wizard *@
+            <div class="template-card"
+                 data-template="@template.TemplateKey"
+                 data-ispremium="@(template.IsPremium ? "true" : "false")">
+
+                <div class="template-badge @(template.IsPremium ? "premium" : "free")">
+                    @(template.IsPremium ? "Premium" : "Gratuit")
+                </div>
+
+                <div class="template-preview"
+                     style="background-image: url('@(string.IsNullOrEmpty(template.PreviewImage) ? "/img/placeholder-cv.jpg" : template.PreviewImage)');">
+                </div>
+
+                <div class="template-info">
+                    <h3>@template.Name</h3>
+                    <button type="button" class="btn-template">Utiliser ce modèle</button>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        // Gestion de la sélection et du stockage local
+        document.querySelectorAll(".template-card").forEach(card => {
+
+            card.addEventListener("click", function() {
+                // Feedback visuel simple (ajoute/retire la classe active)
+                document.querySelectorAll(".template-card").forEach(c => c.classList.remove("active"));
+                this.classList.add("active");
+
+                // Récupération des données techniques du template
+                const template = this.dataset.template;
+                const isPremium = this.dataset.ispremium;
+
+                // Sauvegarde pour que la page Create_Cv puisse les récupérer
+                localStorage.setItem("template", template);
+                localStorage.setItem("isPremium", isPremium);
+
+                console.log("Template sélectionné :", template);
+
+                // Redirection vers le formulaire après un court délai
+                setTimeout(() => {
+                    window.location.href = "/Create_Cv";
+                }, 200);
+            });
+        });
+    });
+</script>
