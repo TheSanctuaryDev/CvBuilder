@@ -20,8 +20,8 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Rediriger vers /login si non authentifié sur routes dashboard
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  // Rediriger vers /login si non authentifié sur routes dashboard ou /cv
+  if (!user && (request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/cv/'))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
