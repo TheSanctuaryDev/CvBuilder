@@ -1,0 +1,18 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Supabase=${SUPABASE_CONNECTION_STRING}
+      - Supabase__ProjectRef=${SUPABASE_PROJECT_REF}
+      - Supabase__JwtSecret=${SUPABASE_JWT_SECRET}
+      - AllowedOrigins=http://localhost:3000
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - FEDAPAY_SECRET_KEY=${FEDAPAY_SECRET_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    restart: unless-stopped

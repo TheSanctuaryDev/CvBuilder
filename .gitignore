@@ -12,6 +12,7 @@ apps/web/.env.local
 
 # Docker
 .dockerignore
+.env
 
 # OS
 .DS_Store
