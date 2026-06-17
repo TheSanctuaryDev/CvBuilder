@@ -32,7 +32,7 @@ export default async function CvDetailPage({ params }: { params: Promise<{ id: s
   return (
     <div className="max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
           <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm transition mb-2 inline-block">
             ← Mes CVs

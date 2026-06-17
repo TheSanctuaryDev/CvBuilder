@@ -13,13 +13,13 @@ export default async function LandingPage() {
       <PublicNav />
       <main className="flex-1">
         {/* Hero */}
-        <section className="max-w-5xl mx-auto px-4 pt-24 pb-20 text-center">
+        <section className="max-w-5xl mx-auto px-4 pt-14 sm:pt-24 pb-16 sm:pb-20 text-center">
           <span className="inline-block bg-amber-400/10 text-amber-400 text-xs font-semibold px-3 py-1 rounded-full mb-6">
             Alimenté par Claude AI
           </span>
-          <h1 className="text-5xl md:text-6xl font-serif font-bold leading-tight mb-6">
-            Votre CV professionnel<br />
-            <span className="text-amber-400">en quelques minutes</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold leading-tight mb-6">
+            Votre CV professionnel{' '}
+            <span className="text-amber-400 block sm:inline">en quelques minutes</span>
           </h1>
           <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
             Renseignez vos informations, choisissez un template, et notre IA génère
@@ -53,7 +53,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Comment ça marche */}
-        <section className="bg-neutral-900 py-20">
+        <section className="bg-neutral-900 py-14 sm:py-20">
           <div className="max-w-5xl mx-auto px-4">
             <h2 className="text-3xl font-serif text-center mb-12">Comment ça marche</h2>
             <div className="grid md:grid-cols-3 gap-8">
@@ -73,7 +73,7 @@ export default async function LandingPage() {
         </section>
 
         {/* Tarifs teaser */}
-        <section className="max-w-5xl mx-auto px-4 py-20 text-center">
+        <section className="max-w-5xl mx-auto px-4 py-14 sm:py-20 text-center">
           <h2 className="text-3xl font-serif mb-4">Tarifs simples</h2>
           <p className="text-neutral-400 mb-8">Templates gratuits à 0 FCFA. Templates premium à 2000 FCFA par CV.</p>
           <Link

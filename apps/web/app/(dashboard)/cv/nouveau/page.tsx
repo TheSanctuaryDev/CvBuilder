@@ -108,7 +108,7 @@ export default function NouveauCvPage() {
           {templates.length === 0 && !error && (
             <p className="text-neutral-400 text-sm">Chargement des templates…</p>
           )}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             {templates.map((t) => (
               <button
                 key={t.templateKey}
