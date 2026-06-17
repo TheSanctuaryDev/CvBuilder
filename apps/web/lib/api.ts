@@ -41,3 +41,10 @@ export async function deleteCv(id: string) {
   const res = await fetch(`${API_URL}/api/cvs/${id}`, { method: 'DELETE', headers })
   if (!res.ok) throw new Error('Erreur suppression CV')
 }
+
+export async function fetchCv(id: string) {
+  const headers = await getAuthHeaders()
+  const res = await fetch(`${API_URL}/api/cvs/${id}`, { headers })
+  if (!res.ok) throw new Error('CV non trouvé')
+  return res.json() as Promise<import('@/types').Cv>
+}
