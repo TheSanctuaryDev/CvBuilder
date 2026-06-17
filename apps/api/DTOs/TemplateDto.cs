@@ -1,0 +1,9 @@
+namespace CvBuilderApi.DTOs;
+
+public record TemplateDto(
+    Guid Id,
+    string Name,
+    string TemplateKey,
+    bool IsPremium,
+    string? PreviewUrl
+);
