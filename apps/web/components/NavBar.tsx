@@ -4,7 +4,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function NavBar() {
+interface NavBarProps {
+  userEmail?: string
+}
+
+export default function NavBar({ userEmail }: NavBarProps) {
   const router = useRouter()
 
   async function handleLogout() {
@@ -24,6 +28,11 @@ export default function NavBar() {
           <Link href="/dashboard" className="text-neutral-400 hover:text-white transition text-sm">
             Mes CVs
           </Link>
+          {userEmail && (
+            <span className="text-xs text-neutral-500 hidden sm:inline">
+              {userEmail}
+            </span>
+          )}
           <button
             onClick={handleLogout}
             className="text-sm text-neutral-400 hover:text-white transition"

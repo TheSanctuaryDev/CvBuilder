@@ -1,7 +1,27 @@
+'use client'
+
 import type { Cv } from '@/types'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { deleteCv } from '@/lib/api'
 
 export default function CvCard({ cv }: { cv: Cv }) {
+  const router = useRouter()
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDelete() {
+    if (!confirm(`Supprimer le CV "${cv.title}" ?`)) return
+    setDeleting(true)
+    try {
+      await deleteCv(cv.id)
+      router.refresh()
+    } catch {
+      alert('Erreur lors de la suppression du CV.')
+      setDeleting(false)
+    }
+  }
+
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 hover:border-neutral-700 transition">
       <div className="flex justify-between items-start mb-3">
@@ -31,6 +51,13 @@ export default function CvCard({ cv }: { cv: Cv }) {
         >
           Modifier
         </Link>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg px-3 py-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {deleting ? '...' : 'Supprimer'}
+        </button>
       </div>
     </div>
   )
