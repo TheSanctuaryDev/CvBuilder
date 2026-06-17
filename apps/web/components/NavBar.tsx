@@ -28,6 +28,9 @@ export default function NavBar({ userEmail }: NavBarProps) {
           <Link href="/dashboard" className="text-neutral-400 hover:text-white transition text-sm">
             Mes CVs
           </Link>
+          <Link href="/cv/nouveau" className="bg-amber-400 text-neutral-950 text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-amber-300 transition">
+            + Nouveau CV
+          </Link>
           {userEmail && (
             <span className="text-xs text-neutral-500 hidden sm:inline">
               {userEmail}
