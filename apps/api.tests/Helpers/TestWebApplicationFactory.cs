@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CvBuilderApi.Data;
@@ -10,8 +11,20 @@ namespace CvBuilderApi.Tests.Helpers;
 
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
+    // Chaque instance de factory a sa propre base InMemory pour éviter la contamination entre classes de tests
+    private readonly string _dbName = $"TestDb_{Guid.NewGuid():N}";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration(config =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Supabase:JwtSecret"] = "test-secret-key-at-least-32-characters-long!!",
+                ["Supabase:ProjectRef"] = "test"
+            });
+        });
+
         builder.ConfigureServices(services =>
         {
             // Remplace Npgsql par InMemory pour les tests
@@ -20,7 +33,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             if (descriptor != null) services.Remove(descriptor);
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseInMemoryDatabase("TestDb_Templates"));
+                options.UseInMemoryDatabase(_dbName));
         });
     }
 
