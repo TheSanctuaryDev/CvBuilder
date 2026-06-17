@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/.git/
+**/node_modules/
+**/.next/
+**/v1-archive/
+apps/web/
+apps/api.tests/
