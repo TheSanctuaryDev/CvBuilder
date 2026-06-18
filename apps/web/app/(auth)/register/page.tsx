@@ -47,7 +47,7 @@ export default function RegisterPage() {
             value={fullName}
             onChange={e => setFullName(e.target.value)}
             required
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -58,7 +58,7 @@ export default function RegisterPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -70,7 +70,7 @@ export default function RegisterPage() {
             onChange={e => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -79,7 +79,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-amber-400 text-black font-semibold rounded-lg px-4 py-3 hover:bg-amber-300 disabled:opacity-50 transition"
+          className="w-full bg-white text-black font-semibold rounded-lg px-4 py-3 hover:bg-neutral-200 disabled:opacity-50 transition"
         >
           {loading ? 'Création...' : "Créer mon compte"}
         </button>
@@ -87,7 +87,7 @@ export default function RegisterPage() {
 
       <p className="text-center text-neutral-400 text-sm mt-6">
         Déjà un compte ?{' '}
-        <Link href="/login" className="text-amber-400 hover:underline">Se connecter</Link>
+        <Link href="/login" className="text-white hover:underline">Se connecter</Link>
       </p>
     </div>
   )

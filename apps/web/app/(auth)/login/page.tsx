@@ -42,7 +42,7 @@ export default function LoginPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -53,7 +53,7 @@ export default function LoginPage() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-amber-400 text-black font-semibold rounded-lg px-4 py-3 hover:bg-amber-300 disabled:opacity-50 transition"
+          className="w-full bg-white text-black font-semibold rounded-lg px-4 py-3 hover:bg-neutral-200 disabled:opacity-50 transition"
         >
           {loading ? 'Connexion...' : 'Se connecter'}
         </button>
@@ -70,7 +70,7 @@ export default function LoginPage() {
 
       <p className="text-center text-neutral-400 text-sm mt-6">
         Pas encore de compte ?{' '}
-        <Link href="/register" className="text-amber-400 hover:underline">S&apos;inscrire</Link>
+        <Link href="/register" className="text-white hover:underline">S&apos;inscrire</Link>
       </p>
     </div>
   )

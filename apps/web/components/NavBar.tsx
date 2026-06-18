@@ -23,7 +23,7 @@ export default function NavBar({ userEmail }: NavBarProps) {
   return (
     <nav className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-xl font-serif text-amber-400">
+        <Link href="/dashboard" className="text-xl font-serif text-white">
           TheCvBuilder
         </Link>
 
@@ -32,7 +32,7 @@ export default function NavBar({ userEmail }: NavBarProps) {
           <Link href="/dashboard" className="text-neutral-400 hover:text-white transition text-sm">
             Mes CVs
           </Link>
-          <Link href="/cv/nouveau" className="bg-amber-400 text-neutral-950 text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-amber-300 transition">
+          <Link href="/cv/nouveau" className="bg-white text-black text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-neutral-200 transition">
             + Nouveau CV
           </Link>
           {userEmail && (
@@ -72,7 +72,7 @@ export default function NavBar({ userEmail }: NavBarProps) {
           <Link href="/dashboard" onClick={() => setOpen(false)} className="text-neutral-300 hover:text-white text-sm px-3 py-2.5 rounded-lg hover:bg-neutral-800 transition">
             Mes CVs
           </Link>
-          <Link href="/cv/nouveau" onClick={() => setOpen(false)} className="text-center bg-amber-400 text-neutral-950 text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-amber-300 transition">
+          <Link href="/cv/nouveau" onClick={() => setOpen(false)} className="text-center bg-white text-black text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-neutral-200 transition">
             + Nouveau CV
           </Link>
           <button

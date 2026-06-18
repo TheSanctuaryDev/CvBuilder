@@ -86,7 +86,7 @@ export default function NouveauCvPage() {
           {stepTitles.map((label, i) => (
             <div
               key={label}
-              className={`h-1 flex-1 rounded-full transition-colors ${i + 1 <= step ? 'bg-amber-400' : 'bg-neutral-800'}`}
+              className={`h-1 flex-1 rounded-full transition-colors ${i + 1 <= step ? 'bg-white' : 'bg-neutral-800'}`}
             />
           ))}
         </div>
@@ -115,12 +115,12 @@ export default function NouveauCvPage() {
                 onClick={() => setSelectedKey(t.templateKey)}
                 className={`text-left border rounded-xl p-4 transition ${
                   selectedKey === t.templateKey
-                    ? 'border-amber-400 bg-amber-400/10'
+                    ? 'border-white bg-white/10'
                     : 'border-neutral-700 hover:border-neutral-500'
                 }`}
               >
                 <div className="font-semibold text-sm mb-1">{t.name}</div>
-                <div className="text-xs text-amber-400">
+                <div className="text-xs text-white">
                   {t.isPremium ? '2000 FCFA' : 'Gratuit'}
                 </div>
               </button>
@@ -129,7 +129,7 @@ export default function NouveauCvPage() {
           <button
             disabled={!selectedKey}
             onClick={() => setStep(2)}
-            className="w-full bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition disabled:opacity-40"
+            className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition disabled:opacity-40"
           >
             Continuer →
           </button>
@@ -159,7 +159,7 @@ export default function NouveauCvPage() {
                   value={(data[field] as string) ?? ''}
                   onChange={set(field)}
                   placeholder={placeholder}
-                  className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400"
+                  className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white"
                 />
                 {required && !data[field] && (
                   <p className="text-xs text-red-400 mt-1">Champ requis</p>
@@ -174,7 +174,7 @@ export default function NouveauCvPage() {
             <button
               disabled={!data.fullName}
               onClick={() => setStep(3)}
-              className="flex-1 bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition disabled:opacity-40"
+              className="flex-1 bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition disabled:opacity-40"
             >
               Continuer →
             </button>
@@ -194,13 +194,13 @@ export default function NouveauCvPage() {
             onChange={set('summary')}
             placeholder="Ex : Développeur Full Stack avec 5 ans d'expérience en React et .NET…"
             rows={6}
-            className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 resize-none"
+            className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white resize-none"
           />
           <div className="flex gap-3 mt-6">
             <button onClick={() => setStep(2)} className="flex-1 border border-neutral-700 text-white py-3 rounded-xl hover:border-neutral-500 transition">
               ← Retour
             </button>
-            <button onClick={() => setStep(4)} className="flex-1 bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition">
+            <button onClick={() => setStep(4)} className="flex-1 bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition">
               Continuer →
             </button>
           </div>
@@ -226,7 +226,7 @@ export default function NouveauCvPage() {
                   }}
                   placeholder={`Expérience ${i + 1} : Ex. Développeur chez Acme (2022-2024) — React, Node.js`}
                   rows={3}
-                  className="flex-1 bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 resize-none"
+                  className="flex-1 bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white resize-none"
                 />
                 {experiences.length > 1 && (
                   <button
@@ -240,7 +240,7 @@ export default function NouveauCvPage() {
             ))}
             <button
               onClick={() => setExperiences([...experiences, ''])}
-              className="text-amber-400 text-sm hover:underline"
+              className="text-white text-sm hover:underline"
             >
               + Ajouter une expérience
             </button>
@@ -249,7 +249,7 @@ export default function NouveauCvPage() {
             <button onClick={() => setStep(3)} className="flex-1 border border-neutral-700 text-white py-3 rounded-xl hover:border-neutral-500 transition">
               ← Retour
             </button>
-            <button onClick={() => setStep(5)} className="flex-1 bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition">
+            <button onClick={() => setStep(5)} className="flex-1 bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition">
               Continuer →
             </button>
           </div>
@@ -275,7 +275,7 @@ export default function NouveauCvPage() {
                   }}
                   placeholder={`Formation ${i + 1} : Ex. Master Informatique — Université d'Abomey-Calavi (2020)`}
                   rows={2}
-                  className="flex-1 bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 resize-none"
+                  className="flex-1 bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white resize-none"
                 />
                 {formations.length > 1 && (
                   <button
@@ -289,7 +289,7 @@ export default function NouveauCvPage() {
             ))}
             <button
               onClick={() => setFormations([...formations, ''])}
-              className="text-amber-400 text-sm hover:underline"
+              className="text-white text-sm hover:underline"
             >
               + Ajouter une formation
             </button>
@@ -298,7 +298,7 @@ export default function NouveauCvPage() {
             <button onClick={() => setStep(4)} className="flex-1 border border-neutral-700 text-white py-3 rounded-xl hover:border-neutral-500 transition">
               ← Retour
             </button>
-            <button onClick={() => setStep(6)} className="flex-1 bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition">
+            <button onClick={() => setStep(6)} className="flex-1 bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition">
               Continuer →
             </button>
           </div>
@@ -323,7 +323,7 @@ export default function NouveauCvPage() {
                       setSkills(next)
                     }}
                     placeholder="Ex. React, TypeScript, .NET"
-                    className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400"
+                    className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white"
                   />
                   {skills.length > 1 && (
                     <button onClick={() => setSkills(skills.filter((_, j) => j !== i))} className="text-neutral-500 hover:text-red-400 transition">
@@ -332,7 +332,7 @@ export default function NouveauCvPage() {
                   )}
                 </div>
               ))}
-              <button onClick={() => setSkills([...skills, ''])} className="text-amber-400 text-sm hover:underline">
+              <button onClick={() => setSkills([...skills, ''])} className="text-white text-sm hover:underline">
                 + Ajouter une compétence
               </button>
             </div>
@@ -344,14 +344,14 @@ export default function NouveauCvPage() {
               value={data.languages ?? ''}
               onChange={set('languages')}
               placeholder="Ex. Français (natif), Anglais (courant)"
-              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400"
+              className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-white"
             />
           </div>
           <div className="flex gap-3 mt-8">
             <button onClick={() => setStep(5)} className="flex-1 border border-neutral-700 text-white py-3 rounded-xl hover:border-neutral-500 transition">
               ← Retour
             </button>
-            <button onClick={() => setStep(7)} className="flex-1 bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition">
+            <button onClick={() => setStep(7)} className="flex-1 bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition">
               Continuer →
             </button>
           </div>
@@ -373,7 +373,7 @@ export default function NouveauCvPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-neutral-400">Type</span>
-              <span className={selectedTemplate?.isPremium ? 'text-amber-400 font-semibold' : 'text-neutral-300'}>
+              <span className={selectedTemplate?.isPremium ? 'text-white font-semibold' : 'text-neutral-300'}>
                 {selectedTemplate?.isPremium ? 'Premium — 2000 FCFA' : 'Gratuit — 0 FCFA'}
               </span>
             </div>
@@ -388,7 +388,7 @@ export default function NouveauCvPage() {
             <button
               onClick={handleSubmit}
               disabled={loading || !data.fullName || !selectedKey}
-              className="flex-1 bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition disabled:opacity-40"
+              className="flex-1 bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition disabled:opacity-40"
             >
               {loading ? 'Création…' : 'Créer mon CV →'}
             </button>

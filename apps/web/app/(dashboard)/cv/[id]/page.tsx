@@ -65,7 +65,7 @@ export default async function CvDetailPage({ params }: { params: Promise<{ id: s
           </div>
           <div>
             <span className="text-neutral-400 block mb-1">Type</span>
-            <span className={cv.isPremium ? 'text-amber-400 font-semibold' : 'text-neutral-300'}>
+            <span className={cv.isPremium ? 'text-white font-semibold' : 'text-neutral-300'}>
               {cv.isPremium ? 'Premium' : 'Gratuit'}
             </span>
           </div>
@@ -105,7 +105,7 @@ export default async function CvDetailPage({ params }: { params: Promise<{ id: s
         {cv.isPremium && !cv.isPaid && (
           <button
             disabled
-            className="flex-1 border border-amber-400/30 text-amber-400/40 font-semibold py-3 rounded-xl cursor-not-allowed text-sm"
+            className="flex-1 border border-white/30 text-white/40 font-semibold py-3 rounded-xl cursor-not-allowed text-sm"
           >
             Débloquer — 2000 FCFA (Phase 3)
           </button>

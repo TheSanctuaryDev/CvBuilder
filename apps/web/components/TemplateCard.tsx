@@ -27,7 +27,7 @@ export default function TemplateCard({ template, isAuthenticated }: TemplateCard
           <span className="text-neutral-600 text-sm">Aperçu non disponible</span>
         )}
         {template.isPremium && (
-          <span className="absolute top-3 right-3 bg-amber-400 text-neutral-950 text-xs font-bold px-2 py-0.5 rounded-full">
+          <span className="absolute top-3 right-3 bg-white text-black text-xs font-bold px-2 py-0.5 rounded-full">
             PREMIUM
           </span>
         )}
@@ -36,13 +36,13 @@ export default function TemplateCard({ template, isAuthenticated }: TemplateCard
       <div className="p-4">
         <div className="flex justify-between items-start mb-3">
           <h3 className="font-semibold text-sm">{template.name}</h3>
-          <span className="text-amber-400 text-sm font-semibold">
+          <span className="text-white text-sm font-semibold">
             {template.isPremium ? '2000 FCFA' : 'Gratuit'}
           </span>
         </div>
         <Link
           href={href}
-          className="block w-full text-center bg-amber-400 text-neutral-950 text-sm font-semibold py-2 rounded-lg hover:bg-amber-300 transition"
+          className="block w-full text-center bg-white text-black text-sm font-semibold py-2 rounded-lg hover:bg-neutral-200 transition"
         >
           Utiliser ce template
         </Link>

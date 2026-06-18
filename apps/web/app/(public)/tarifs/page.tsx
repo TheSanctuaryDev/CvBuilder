@@ -13,7 +13,7 @@ export default function TarifsPage() {
         {/* Gratuit */}
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8">
           <h2 className="text-2xl font-serif mb-1">Gratuit</h2>
-          <div className="text-4xl font-bold text-amber-400 my-4">0 FCFA</div>
+          <div className="text-4xl font-bold text-white my-4">0 FCFA</div>
           <p className="text-neutral-400 text-sm mb-6">Par CV généré</p>
           <ul className="space-y-3 text-sm text-neutral-300 mb-8">
             {[
@@ -23,7 +23,7 @@ export default function TarifsPage() {
               'Historique de vos CVs',
             ].map((f) => (
               <li key={f} className="flex gap-2">
-                <span className="text-amber-400">✓</span> {f}
+                <span className="text-white">✓</span> {f}
               </li>
             ))}
           </ul>
@@ -36,12 +36,12 @@ export default function TarifsPage() {
         </div>
 
         {/* Premium */}
-        <div className="bg-neutral-900 border-2 border-amber-400 rounded-2xl p-8 relative">
-          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-neutral-950 text-xs font-bold px-4 py-1 rounded-full">
+        <div className="bg-neutral-900 border-2 border-white rounded-2xl p-8 relative">
+          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-bold px-4 py-1 rounded-full">
             POPULAIRE
           </span>
           <h2 className="text-2xl font-serif mb-1">Premium</h2>
-          <div className="text-4xl font-bold text-amber-400 my-4">2000 FCFA</div>
+          <div className="text-4xl font-bold text-white my-4">2000 FCFA</div>
           <p className="text-neutral-400 text-sm mb-6">Par CV premium généré</p>
           <ul className="space-y-3 text-sm text-neutral-300 mb-8">
             {[
@@ -52,13 +52,13 @@ export default function TarifsPage() {
               'Modification et régénération',
             ].map((f) => (
               <li key={f} className="flex gap-2">
-                <span className="text-amber-400">✓</span> {f}
+                <span className="text-white">✓</span> {f}
               </li>
             ))}
           </ul>
           <Link
             href="/templates"
-            className="block text-center bg-amber-400 text-neutral-950 font-semibold py-3 rounded-xl hover:bg-amber-300 transition"
+            className="block text-center bg-white text-black font-semibold py-3 rounded-xl hover:bg-neutral-200 transition"
           >
             Choisir un template
           </Link>

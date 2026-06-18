@@ -47,7 +47,7 @@ export default function PrivacyPage() {
         </p>
         <a
           href="mailto:thesanctuarydev29@gmail.com"
-          className="text-amber-400 hover:underline text-sm"
+          className="text-white hover:underline text-sm"
         >
           thesanctuarydev29@gmail.com
         </a>

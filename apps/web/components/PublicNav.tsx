@@ -9,7 +9,7 @@ export default function PublicNav() {
   return (
     <nav className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-xl font-serif text-amber-400">
+        <Link href="/" className="text-xl font-serif text-white">
           TheCvBuilder
         </Link>
 
@@ -24,7 +24,7 @@ export default function PublicNav() {
           <Link href="/login" className="text-neutral-400 hover:text-white transition text-sm px-3 py-1">
             Connexion
           </Link>
-          <Link href="/register" className="bg-amber-400 text-neutral-950 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-amber-300 transition">
+          <Link href="/register" className="bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-neutral-200 transition">
             Commencer
           </Link>
         </div>
@@ -59,7 +59,7 @@ export default function PublicNav() {
           <Link href="/login" onClick={() => setOpen(false)} className="text-neutral-300 hover:text-white text-sm px-3 py-2.5 rounded-lg hover:bg-neutral-800 transition">
             Connexion
           </Link>
-          <Link href="/register" onClick={() => setOpen(false)} className="mt-2 text-center bg-amber-400 text-neutral-950 text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-amber-300 transition">
+          <Link href="/register" onClick={() => setOpen(false)} className="mt-2 text-center bg-white text-black text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-neutral-200 transition">
             Commencer gratuitement
           </Link>
         </div>

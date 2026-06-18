@@ -27,7 +27,7 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-serif">Mes CVs</h1>
         <Link
           href="/cv/nouveau"
-          className="bg-amber-400 text-black font-semibold rounded-lg px-5 py-2.5 hover:bg-amber-300 transition"
+          className="bg-white text-black font-semibold rounded-lg px-5 py-2.5 hover:bg-neutral-200 transition"
         >
           + Nouveau CV
         </Link>
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
           </p>
           <Link
             href="/cv/nouveau"
-            className="bg-amber-400 text-neutral-950 font-semibold text-sm px-6 py-3 rounded-xl hover:bg-amber-300 transition"
+            className="bg-white text-black font-semibold text-sm px-6 py-3 rounded-xl hover:bg-neutral-200 transition"
           >
             Créer mon premier CV →
           </Link>
