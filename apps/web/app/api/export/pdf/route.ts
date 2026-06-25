@@ -54,7 +54,27 @@ const A4_CSS = `
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Auth check
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { error: authError } = await supabase.auth.getUser(token)
+    if (authError) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // 2. Input validation
     const { sections } = (await req.json()) as { sections: CvSection[] }
+    if (!Array.isArray(sections) || sections.length > 20) {
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    }
+
     const sorted = [...sections].sort((a, b) => a.order - b.order)
     const sectionsHtml = sorted.map(renderSectionToMarkup).join('\n')
 
