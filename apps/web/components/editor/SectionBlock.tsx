@@ -10,6 +10,8 @@ import ExperienceSectionView from '@/components/cv-sections/ExperienceSectionVie
 import FormationSectionView from '@/components/cv-sections/FormationSectionView'
 import SkillsSectionView from '@/components/cv-sections/SkillsSectionView'
 import LanguagesSectionView from '@/components/cv-sections/LanguagesSectionView'
+import InterestsSectionView from '@/components/cv-sections/InterestsSectionView'
+import ReferencesSectionView from '@/components/cv-sections/ReferencesSectionView'
 
 interface SectionBlockProps {
   section: CvSection
@@ -26,6 +28,8 @@ function renderSection(section: CvSection) {
     case 'formation': return <FormationSectionView section={section} />
     case 'skills': return <SkillsSectionView section={section} />
     case 'languages': return <LanguagesSectionView section={section} />
+    case 'interests': return <InterestsSectionView section={section} />
+    case 'references': return <ReferencesSectionView section={section} />
     default: return null
   }
 }

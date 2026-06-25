@@ -111,9 +111,10 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
   }
 
   async function exportDocx() {
+    const auth = await getAuthHeader()
     const res = await fetch('/api/export/docx', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { Authorization: auth, 'Content-Type': 'application/json' },
       body: JSON.stringify({ sections: state.sections }),
     })
     if (!res.ok) return alert('Erreur export Word')

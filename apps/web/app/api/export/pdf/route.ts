@@ -8,6 +8,8 @@ import ExperienceSectionView from '@/components/cv-sections/ExperienceSectionVie
 import FormationSectionView from '@/components/cv-sections/FormationSectionView'
 import SkillsSectionView from '@/components/cv-sections/SkillsSectionView'
 import LanguagesSectionView from '@/components/cv-sections/LanguagesSectionView'
+import InterestsSectionView from '@/components/cv-sections/InterestsSectionView'
+import ReferencesSectionView from '@/components/cv-sections/ReferencesSectionView'
 import React from 'react'
 
 function renderSectionToMarkup(section: CvSection): string {
@@ -18,6 +20,8 @@ function renderSectionToMarkup(section: CvSection): string {
     case 'formation': return renderToStaticMarkup(React.createElement(FormationSectionView, { section }))
     case 'skills': return renderToStaticMarkup(React.createElement(SkillsSectionView, { section }))
     case 'languages': return renderToStaticMarkup(React.createElement(LanguagesSectionView, { section }))
+    case 'interests': return renderToStaticMarkup(React.createElement(InterestsSectionView, { section }))
+    case 'references': return renderToStaticMarkup(React.createElement(ReferencesSectionView, { section }))
     default: return ''
   }
 }
@@ -91,10 +95,14 @@ export async function POST(req: NextRequest) {
 
     const { chromium } = await import('playwright-chromium')
     const browser = await chromium.launch()
-    const page = await browser.newPage()
-    await page.setContent(html, { waitUntil: 'networkidle' })
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true })
-    await browser.close()
+    let pdfBuffer: Buffer
+    try {
+      const page = await browser.newPage()
+      await page.setContent(html, { waitUntil: 'networkidle' })
+      pdfBuffer = await page.pdf({ format: 'A4', printBackground: true })
+    } finally {
+      await browser.close()
+    }
 
     return new NextResponse(pdfBuffer as unknown as BodyInit, {
       headers: {
