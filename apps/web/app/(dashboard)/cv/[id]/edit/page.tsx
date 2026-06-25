@@ -1,21 +1,27 @@
-import Link from 'next/link'
+// apps/web/app/(dashboard)/cv/[id]/edit/page.tsx
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import CVEditor from '@/components/editor/CVEditor'
 
 export default async function CvEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) redirect('/login')
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
+  const res = await fetch(`${apiUrl}/api/cvs/${id}`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) redirect('/dashboard')
+  const cv = await res.json()
+
   return (
-    <div className="max-w-2xl mx-auto text-center py-20">
-      <Link href={`/cv/${id}`} className="text-neutral-400 hover:text-white text-sm transition mb-6 inline-block">
-        ← Retour au CV
-      </Link>
-      <div className="text-4xl mb-4">✏️</div>
-      <h1 className="text-2xl font-serif mb-4">Modifier le CV</h1>
-      <p className="text-neutral-400 text-sm mb-6">
-        La modification et la régénération seront disponibles en Phase 3,
-        une fois l&apos;intégration Claude AI en place.
-      </p>
-      <span className="inline-block bg-neutral-800 text-neutral-400 text-xs px-3 py-1 rounded-full">
-        Phase 3 — Claude AI
-      </span>
-    </div>
+    <CVEditor
+      cvId={id}
+      templateKey={cv.templateKey}
+      title={cv.title}
+    />
   )
 }
