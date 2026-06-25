@@ -294,7 +294,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
         {/* Bottom drawer mobile */}
         {mobileSectionList && state.activeSectionId && (
           <div className="fixed inset-0 z-50 flex flex-col justify-end">
-            <div className="bg-black/60" onClick={() => setMobileSectionList(false)} />
+            <div className="flex-1 bg-black/60" onClick={() => setMobileSectionList(false)} />
             <div className="bg-neutral-950 rounded-t-2xl border-t border-neutral-800 overflow-y-auto" style={{ maxHeight: '70vh' }}>
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-10 h-1 bg-neutral-700 rounded-full" />
