@@ -16,6 +16,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import type { CvSection, EditorAction } from '@/types/editor'
+import type { StyleTokens } from '@/components/templates/registry'
+import { generatePreviewVars } from '@/components/templates/registry'
 import SectionBlock from './SectionBlock'
 
 interface CVPreviewProps {
@@ -24,9 +26,10 @@ interface CVPreviewProps {
   dispatch: React.Dispatch<EditorAction>
   isDragDisabled?: boolean
   templateKey?: string
+  styleTokens?: StyleTokens
 }
 
-export default function CVPreview({ sections, activeSectionId, dispatch, isDragDisabled, templateKey = 'classic' }: CVPreviewProps) {
+export default function CVPreview({ sections, activeSectionId, dispatch, isDragDisabled, templateKey = 'classic', styleTokens }: CVPreviewProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -48,10 +51,12 @@ export default function CVPreview({ sections, activeSectionId, dispatch, isDragD
     dispatch({ type: 'REORDER', ids: reordered.map(s => s.id) })
   }
 
+  const cssVars = styleTokens ? generatePreviewVars(styleTokens) : {}
+
   return (
     <div
-      className={`bg-white shadow-2xl mx-auto cv-template-${templateKey}`}
-      style={{ width: 794, minHeight: 1123, padding: '60px 72px' }}
+      className="bg-white shadow-2xl mx-auto"
+      style={{ width: 794, minHeight: 1123, padding: '60px 72px', ...cssVars }}
     >
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={sorted.map(s => s.id)} strategy={verticalListSortingStrategy}>

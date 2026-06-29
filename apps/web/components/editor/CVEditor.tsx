@@ -14,12 +14,14 @@ import CVPreview from './CVPreview'
 import SectionPanel from './SectionPanel'
 import type { CvData } from '@/types'
 import type { EditorState } from '@/types/editor'
+import { DEFAULT_TOKENS, type StyleTokens } from '@/components/templates/registry'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
 
 interface CVEditorProps {
   cvId: string
   templateKey: string
+  styleTokens?: StyleTokens
   title: string
 }
 
@@ -29,7 +31,7 @@ async function getAuthHeader(): Promise<string> {
   return session ? `Bearer ${session.access_token}` : ''
 }
 
-export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
+export default function CVEditor({ cvId, templateKey, styleTokens = DEFAULT_TOKENS, title }: CVEditorProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'dirty' | 'saving' | 'error'>('saved')
@@ -106,7 +108,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
     const res = await fetch('/api/export/pdf', {
       method: 'POST',
       headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cvId, sections: state.sections, templateKey }),
+      body: JSON.stringify({ cvId, sections: state.sections, templateKey, styleTokens }),
     })
     if (!res.ok) return alert('Erreur export PDF')
     const blob = await res.blob()
@@ -123,7 +125,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
     const res = await fetch('/api/export/docx', {
       method: 'POST',
       headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sections: state.sections, templateKey }),
+      body: JSON.stringify({ sections: state.sections, templateKey, styleTokens }),
     })
     if (!res.ok) return alert('Erreur export Word')
     const blob = await res.blob()
@@ -204,6 +206,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
             activeSectionId={state.activeSectionId}
             dispatch={dispatch}
             templateKey={templateKey}
+            styleTokens={styleTokens}
           />
         </div>
         {/* Panneau latéral */}

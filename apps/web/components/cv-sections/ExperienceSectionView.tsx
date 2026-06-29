@@ -4,7 +4,7 @@ import type { ExperienceSection } from '@/types/editor'
 export default function ExperienceSectionView({ section }: { section: ExperienceSection }) {
   return (
     <div className="mb-5">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-3">
+      <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--cv-accent-color, #6b7280)' }}>
         Expériences professionnelles
       </h2>
       <div className="space-y-4">
@@ -14,7 +14,7 @@ export default function ExperienceSectionView({ section }: { section: Experience
               <span className="text-sm font-semibold text-black">
                 {entry.title || <span className="text-neutral-400 italic">Poste</span>}
                 {entry.company && (
-                  <span className="font-normal text-neutral-600"> · {entry.company}</span>
+                  <span className="font-normal" style={{ color: 'var(--cv-accent-color, #4b5563)' }}> · {entry.company}</span>
                 )}
               </span>
               <span className="text-xs text-neutral-400 ml-2 shrink-0">

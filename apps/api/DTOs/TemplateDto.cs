@@ -6,5 +6,6 @@ public record TemplateDto(
     string TemplateKey,
     bool IsPremium,
     bool IsActive,
-    string? PreviewUrl
+    string? PreviewUrl,
+    string StyleTokens
 );

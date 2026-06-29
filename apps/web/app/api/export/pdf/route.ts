@@ -10,7 +10,7 @@ import SkillsSectionView from '@/components/cv-sections/SkillsSectionView'
 import LanguagesSectionView from '@/components/cv-sections/LanguagesSectionView'
 import InterestsSectionView from '@/components/cv-sections/InterestsSectionView'
 import ReferencesSectionView from '@/components/cv-sections/ReferencesSectionView'
-import { getTemplate } from '@/components/templates/registry'
+import { parseTokens, generatePdfCss, type StyleTokens } from '@/components/templates/registry'
 import React from 'react'
 
 function renderSectionToMarkup(section: CvSection): string {
@@ -46,12 +46,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Input validation
-    const { sections, templateKey } = (await req.json()) as { sections: CvSection[], templateKey?: string }
+    const { sections, styleTokens } = (await req.json()) as { sections: CvSection[], styleTokens?: StyleTokens }
     if (!Array.isArray(sections) || sections.length > 20) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
     }
 
-    const template = getTemplate(templateKey ?? 'classic')
+    const tokens = parseTokens(styleTokens ? JSON.stringify(styleTokens) : null)
     const sorted = [...sections].sort((a, b) => a.order - b.order)
     const sectionsHtml = sorted.map(renderSectionToMarkup).join('\n')
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <style>${template.pdfCss}</style>
+  <style>${generatePdfCss(tokens)}</style>
 </head>
 <body>
   <div class="page">${sectionsHtml}</div>

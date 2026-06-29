@@ -97,7 +97,7 @@ public class AdminController(AppDbContext db) : ControllerBase
 
         var templates = await db.Templates
             .OrderBy(t => t.Name)
-            .Select(t => new TemplateDto(t.Id, t.Name, t.TemplateKey, t.IsPremium, t.IsActive, t.PreviewUrl))
+            .Select(t => new TemplateDto(t.Id, t.Name, t.TemplateKey, t.IsPremium, t.IsActive, t.PreviewUrl, t.StyleTokens))
             .ToListAsync();
 
         return Ok(templates);
@@ -170,13 +170,14 @@ public class AdminController(AppDbContext db) : ControllerBase
             IsActive = true,
             PreviewUrl = req.PreviewUrl?.Trim(),
         };
+        if (req.StyleTokens is { } st) template.StyleTokens = st.Trim();
 
         db.Templates.Add(template);
         await db.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetTemplates), null,
             new TemplateDto(template.Id, template.Name, template.TemplateKey,
-                template.IsPremium, template.IsActive, template.PreviewUrl));
+                template.IsPremium, template.IsActive, template.PreviewUrl, template.StyleTokens));
     }
 
     [HttpPatch("templates/{id:guid}")]
@@ -192,6 +193,7 @@ public class AdminController(AppDbContext db) : ControllerBase
         if (req.Name is { } name) template.Name = name.Trim();
         if (req.TemplateKey is { } key) template.TemplateKey = key.Trim().ToLower();
         if (req.PreviewUrl is { } url) template.PreviewUrl = url.Trim();
+        if (req.StyleTokens is { } tokens) template.StyleTokens = tokens.Trim();
 
         await db.SaveChangesAsync();
         return NoContent();

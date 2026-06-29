@@ -1,10 +1,26 @@
-export type TemplateDefinition = {
-  name: string
-  pdfCss: string
-  docx: {
-    heading1Color: string
-    heading2Color: string
-    secondaryColor: string
+export type StyleTokens = {
+  fontFamily: 'serif' | 'sans-serif'
+  nameColor: string
+  accentColor: string
+  dividerColor: string
+  dividerWidth: '1' | '2'
+}
+
+export const DEFAULT_TOKENS: StyleTokens = {
+  fontFamily: 'serif',
+  nameColor: '#111111',
+  accentColor: '#6b7280',
+  dividerColor: '#d1d5db',
+  dividerWidth: '1',
+}
+
+export function parseTokens(raw: string | null | undefined): StyleTokens {
+  try {
+    if (!raw) return DEFAULT_TOKENS
+    const parsed = JSON.parse(raw)
+    return { ...DEFAULT_TOKENS, ...parsed }
+  } catch {
+    return DEFAULT_TOKENS
   }
 }
 
@@ -27,55 +43,49 @@ const PDF_BASE = `
   .rounded-full { border-radius: 9999px; } .border { border: 1px solid; }
   .px-2 { padding-left: 6px; padding-right: 6px; }
   .py-0\\.5 { padding-top: 2px; padding-bottom: 2px; }
-  .ml-2 { margin-left: 6px; }
+  .ml-2 { margin-left: 6px; } .italic { font-style: italic; }
 `
 
-export const templateRegistry: Record<string, TemplateDefinition> = {
-  classic: {
-    name: 'Classic',
-    pdfCss: `
-      ${PDF_BASE}
-      body { font-family: Georgia, 'Times New Roman', serif; font-size: 12px; color: #111; background: white; }
-      .page { width: 794px; min-height: 1123px; padding: 60px 72px; }
-      h1 { font-size: 22px; font-weight: 700; color: #111; }
-      h2 { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #6b7280; margin-bottom: 8px; }
-      p { line-height: 1.6; }
-      hr { border: none; border-top: 1px solid #d1d5db; margin: 12px 0; }
-      .text-black { color: #111; }
-      .text-neutral-400 { color: #9ca3af; } .text-neutral-500 { color: #6b7280; }
-      .text-neutral-600 { color: #4b5563; } .text-neutral-700 { color: #374151; }
-      .italic { font-style: italic; }
-    `,
-    docx: {
-      heading1Color: '111111',
-      heading2Color: '666666',
-      secondaryColor: '555555',
-    },
-  },
+export function generatePdfCss(tokens: StyleTokens): string {
+  const fontStack = tokens.fontFamily === 'serif'
+    ? "Georgia, 'Times New Roman', serif"
+    : "'Helvetica Neue', Arial, sans-serif"
 
-  modern: {
-    name: 'Modern',
-    pdfCss: `
-      ${PDF_BASE}
-      body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #374151; background: white; }
-      .page { width: 794px; min-height: 1123px; padding: 60px 72px; }
-      h1 { font-size: 24px; font-weight: 700; color: #1e3a5f; letter-spacing: -0.02em; }
-      h2 { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #2563eb; margin-bottom: 8px; }
-      p { line-height: 1.6; }
-      hr { border: none; border-top: 2px solid #bfdbfe; margin: 12px 0; }
-      .text-black { color: #1e3a5f; }
-      .text-neutral-400 { color: #60a5fa; } .text-neutral-500 { color: #1e40af; }
-      .text-neutral-600 { color: #2563eb; } .text-neutral-700 { color: #1e3a5f; }
-      .italic { font-style: italic; }
-    `,
-    docx: {
-      heading1Color: '1e3a5f',
-      heading2Color: '2563eb',
-      secondaryColor: '2563eb',
-    },
-  },
+  return `
+    ${PDF_BASE}
+    body { font-family: ${fontStack}; font-size: 12px; color: #111; background: white; }
+    .page { width: 794px; min-height: 1123px; padding: 60px 72px; }
+    h1 { font-size: 22px; font-weight: 700; color: ${tokens.nameColor}; }
+    h2 { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: ${tokens.accentColor}; margin-bottom: 8px; }
+    p { line-height: 1.6; }
+    hr { border: none; border-top: ${tokens.dividerWidth}px solid ${tokens.dividerColor}; margin: 12px 0; }
+    .text-black { color: ${tokens.nameColor}; }
+    .text-neutral-700 { color: ${tokens.nameColor}; }
+    .text-neutral-600 { color: ${tokens.accentColor}; }
+    .text-neutral-500 { color: ${tokens.accentColor}; }
+    .text-neutral-400 { color: ${tokens.dividerColor}; }
+  `
 }
 
-export function getTemplate(key: string): TemplateDefinition {
-  return templateRegistry[key] ?? templateRegistry.classic
+// CSS variables pour l'aperçu en direct (appliquées sur le wrapper CVPreview)
+export function generatePreviewVars(tokens: StyleTokens): Record<string, string> {
+  const fontStack = tokens.fontFamily === 'serif'
+    ? "Georgia, 'Times New Roman', serif"
+    : "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+
+  return {
+    '--cv-font': fontStack,
+    '--cv-name-color': tokens.nameColor,
+    '--cv-accent-color': tokens.accentColor,
+    '--cv-divider-color': tokens.dividerColor,
+    '--cv-divider-width': `${tokens.dividerWidth}px`,
+  } as Record<string, string>
+}
+
+export function tokensToDocxTheme(tokens: StyleTokens) {
+  return {
+    heading1Color: tokens.nameColor.replace('#', ''),
+    heading2Color: tokens.accentColor.replace('#', ''),
+    secondaryColor: tokens.accentColor.replace('#', ''),
+  }
 }

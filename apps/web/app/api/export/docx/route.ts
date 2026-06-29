@@ -5,7 +5,7 @@ import {
   BorderStyle,
 } from 'docx'
 import type { CvSection, ExperienceSection, FormationSection } from '@/types/editor'
-import { getTemplate } from '@/components/templates/registry'
+import { parseTokens, tokensToDocxTheme, type StyleTokens } from '@/components/templates/registry'
 
 function buildDocxChildren(sections: CvSection[], secondaryColor: string): Paragraph[] {
   const paras: Paragraph[] = []
@@ -137,12 +137,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Input validation
-    const { sections, templateKey } = (await req.json()) as { sections: CvSection[], templateKey?: string }
+    const { sections, styleTokens } = (await req.json()) as { sections: CvSection[], styleTokens?: StyleTokens }
     if (!Array.isArray(sections) || sections.length > 20) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
     }
 
-    const { docx: theme } = getTemplate(templateKey ?? 'classic')
+    const tokens = parseTokens(styleTokens ? JSON.stringify(styleTokens) : null)
+    const theme = tokensToDocxTheme(tokens)
 
     const doc = new Document({
       sections: [{

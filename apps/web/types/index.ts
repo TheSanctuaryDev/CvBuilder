@@ -5,6 +5,7 @@ export type Template = {
   isPremium: boolean
   isActive: boolean
   previewUrl: string | null
+  styleTokens: string
 }
 
 export type Cv = {

@@ -4,7 +4,7 @@ import type { SkillsSection } from '@/types/editor'
 export default function SkillsSectionView({ section }: { section: SkillsSection }) {
   return (
     <div className="mb-5">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+      <h2 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--cv-accent-color, #6b7280)' }}>
         Compétences
       </h2>
       <div className="flex flex-wrap gap-2">

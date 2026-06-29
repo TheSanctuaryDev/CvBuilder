@@ -4,7 +4,10 @@ import type { FormationSection } from '@/types/editor'
 export default function FormationSectionView({ section }: { section: FormationSection }) {
   return (
     <div className="mb-5">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-3">
+      <h2
+        className="text-xs font-bold uppercase tracking-widest mb-3"
+        style={{ color: 'var(--cv-accent-color, #6b7280)' }}
+      >
         Formation
       </h2>
       <div className="space-y-3">
@@ -14,7 +17,7 @@ export default function FormationSectionView({ section }: { section: FormationSe
               <span className="text-sm font-semibold text-black">
                 {entry.degree || <span className="text-neutral-400 italic">Diplôme</span>}
                 {entry.school && (
-                  <span className="font-normal text-neutral-600"> · {entry.school}</span>
+                  <span className="font-normal" style={{ color: 'var(--cv-accent-color, #4b5563)' }}> · {entry.school}</span>
                 )}
               </span>
               {entry.year && (
