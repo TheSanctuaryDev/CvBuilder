@@ -96,7 +96,7 @@ public class AdminController(AppDbContext db) : ControllerBase
 
         var templates = await db.Templates
             .OrderBy(t => t.Name)
-            .Select(t => new TemplateDto(t.Id, t.Name, t.TemplateKey, t.IsPremium, t.IsActive))
+            .Select(t => new TemplateDto(t.Id, t.Name, t.TemplateKey, t.IsPremium, t.IsActive, t.PreviewUrl))
             .ToListAsync();
 
         return Ok(templates);

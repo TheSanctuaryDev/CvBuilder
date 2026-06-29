@@ -76,7 +76,7 @@ export default function TarifsPage() {
             },
             {
               q: 'Quels moyens de paiement acceptez-vous ?',
-              a: 'Carte bancaire internationale (Stripe) et Mobile Money MTN/Moov (FedaPay).',
+              a: 'Mobile Money MTN/Moov via FedaPay. Paiement sécurisé depuis votre téléphone.',
             },
             {
               q: 'Puis-je modifier mon CV après l\'avoir payé ?',

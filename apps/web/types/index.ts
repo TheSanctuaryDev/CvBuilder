@@ -3,6 +3,7 @@ export type Template = {
   name: string
   templateKey: string
   isPremium: boolean
+  isActive: boolean
   previewUrl: string | null
 }
 

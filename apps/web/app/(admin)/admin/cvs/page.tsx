@@ -31,8 +31,8 @@ export default async function AdminCvsPage({
   return (
     <div>
       <h1 className="text-2xl font-serif mb-6">CVs</h1>
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden overflow-x-auto">
+        <table className="w-full text-sm min-w-130">
           <thead>
             <tr className="border-b border-neutral-800 text-neutral-400">
               <th className="text-left px-4 py-3 font-medium">Titre</th>
@@ -48,7 +48,7 @@ export default async function AdminCvsPage({
             )}
             {cvs.map((cv: { id: string; title: string; templateKey: string; isPremium: boolean; isPaid: boolean; createdAt: string }) => (
               <tr key={cv.id} className="border-b border-neutral-800/50 hover:bg-neutral-800/30 transition">
-                <td className="px-4 py-3 font-medium truncate max-w-[200px]">{cv.title}</td>
+                <td className="px-4 py-3 font-medium truncate max-w-50">{cv.title}</td>
                 <td className="px-4 py-3 text-neutral-400">{cv.templateKey}</td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-0.5 rounded ${cv.isPremium ? 'bg-amber-500/20 text-amber-400' : 'bg-neutral-700 text-neutral-300'}`}>

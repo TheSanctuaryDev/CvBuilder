@@ -37,8 +37,8 @@ export default async function AdminPaiementsPage({
   return (
     <div>
       <h1 className="text-2xl font-serif mb-6">Paiements</h1>
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-x-auto">
+        <table className="w-full text-sm min-w-120">
           <thead>
             <tr className="border-b border-neutral-800 text-neutral-400">
               <th className="text-left px-4 py-3 font-medium">Montant</th>

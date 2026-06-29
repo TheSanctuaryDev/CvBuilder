@@ -16,7 +16,7 @@ public class TemplatesController(AppDbContext db) : ControllerBase
             .Where(t => t.IsActive)
             .OrderBy(t => t.IsPremium)
             .ThenBy(t => t.Name)
-            .Select(t => new TemplateDto(t.Id, t.Name, t.TemplateKey, t.IsPremium, t.IsActive))
+            .Select(t => new TemplateDto(t.Id, t.Name, t.TemplateKey, t.IsPremium, t.IsActive, t.PreviewUrl))
             .ToListAsync();
 
         return Ok(templates);
