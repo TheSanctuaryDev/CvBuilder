@@ -19,11 +19,17 @@ public static class CvPromptBuilder
         - La langue de sortie doit être le français
         """;
 
-    public static string BuildUserPrompt(JsonElement cvData)
+    public static string BuildUserPrompt(JsonElement cvData, string templateKey = "classic")
     {
         var raw = JsonSerializer.Serialize(cvData, new JsonSerializerOptions { WriteIndented = false });
+        var styleHint = templateKey switch
+        {
+            "modern" => "\nStyle visuel : Modern — favorise un langage dynamique, des verbes d'action, des formulations concises et percutantes.",
+            "minimal" => "\nStyle visuel : Minimal — favorise un langage sobre, direct et épuré, sans fioritures.",
+            _ => ""
+        };
         return $"""
-            Voici les données brutes du CV :
+            Voici les données brutes du CV :{styleHint}
 
             {raw}
 

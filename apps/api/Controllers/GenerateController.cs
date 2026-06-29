@@ -77,7 +77,7 @@ public class GenerateController(AppDbContext db, AiProviderResolver resolver) : 
 
             await SendEvent("status", new { msg = $"Génération via {ai.ProviderName.ToUpper()}..." });
 
-            var userPrompt = CvPromptBuilder.BuildUserPrompt(cvData);
+            var userPrompt = CvPromptBuilder.BuildUserPrompt(cvData, cv.TemplateKey);
             var rawResult = await ai.GenerateAsync(CvPromptBuilder.SystemPrompt, userPrompt, ct);
 
             await SendEvent("status", new { msg = "Analyse du résultat..." });

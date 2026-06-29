@@ -123,7 +123,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
     const res = await fetch('/api/export/docx', {
       method: 'POST',
       headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sections: state.sections }),
+      body: JSON.stringify({ sections: state.sections, templateKey }),
     })
     if (!res.ok) return alert('Erreur export Word')
     const blob = await res.blob()
@@ -203,6 +203,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
             sections={state.sections}
             activeSectionId={state.activeSectionId}
             dispatch={dispatch}
+            templateKey={templateKey}
           />
         </div>
         {/* Panneau latéral */}
@@ -223,6 +224,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
               <CVPreview
                 sections={state.sections}
                 activeSectionId={state.activeSectionId}
+                templateKey={templateKey}
                 dispatch={(action) => {
                   dispatch(action)
                   if (action.type === 'SET_ACTIVE') setMobileTab('edit')
@@ -250,6 +252,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
               sections={state.sections}
               activeSectionId={null}
               dispatch={() => {}}
+              templateKey={templateKey}
               isDragDisabled
             />
           </div>

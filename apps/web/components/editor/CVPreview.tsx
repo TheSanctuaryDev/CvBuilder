@@ -23,9 +23,10 @@ interface CVPreviewProps {
   activeSectionId: string | null
   dispatch: React.Dispatch<EditorAction>
   isDragDisabled?: boolean
+  templateKey?: string
 }
 
-export default function CVPreview({ sections, activeSectionId, dispatch, isDragDisabled }: CVPreviewProps) {
+export default function CVPreview({ sections, activeSectionId, dispatch, isDragDisabled, templateKey = 'classic' }: CVPreviewProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -49,7 +50,7 @@ export default function CVPreview({ sections, activeSectionId, dispatch, isDragD
 
   return (
     <div
-      className="bg-white shadow-2xl mx-auto"
+      className={`bg-white shadow-2xl mx-auto cv-template-${templateKey}`}
       style={{ width: 794, minHeight: 1123, padding: '60px 72px' }}
     >
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>

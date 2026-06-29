@@ -16,3 +16,32 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* ── Template: classic (par défaut, pas de surcharge nécessaire) ──────── */
+
+/* ── Template: modern ───────────────────────────────────────────────────── */
+.cv-template-modern {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.cv-template-modern h1 {
+  color: #1e3a5f;
+}
+.cv-template-modern h2 {
+  color: #2563eb;
+}
+.cv-template-modern hr {
+  border-top-color: #bfdbfe;
+  border-top-width: 2px;
+}
+.cv-template-modern .text-black {
+  color: #1e3a5f;
+}
+.cv-template-modern .text-neutral-600 {
+  color: #2563eb;
+}
+.cv-template-modern .text-neutral-500 {
+  color: #1e40af;
+}
+.cv-template-modern .text-neutral-400 {
+  color: #60a5fa;
+}

@@ -5,8 +5,9 @@ import {
   BorderStyle,
 } from 'docx'
 import type { CvSection, ExperienceSection, FormationSection } from '@/types/editor'
+import { getTemplate } from '@/components/templates/registry'
 
-function buildDocxChildren(sections: CvSection[]): Paragraph[] {
+function buildDocxChildren(sections: CvSection[], secondaryColor: string): Paragraph[] {
   const paras: Paragraph[] = []
   const sorted = [...sections].sort((a, b) => a.order - b.order)
 
@@ -19,7 +20,7 @@ function buildDocxChildren(sections: CvSection[]): Paragraph[] {
             heading: HeadingLevel.HEADING_1,
           }),
           new Paragraph({
-            children: [new TextRun({ text: section.jobTitle, color: '555555' })],
+            children: [new TextRun({ text: section.jobTitle, color: secondaryColor })],
           })
         )
         const contacts = [
@@ -51,7 +52,7 @@ function buildDocxChildren(sections: CvSection[]): Paragraph[] {
             new Paragraph({
               children: [
                 new TextRun({ text: entry.title, bold: true }),
-                entry.company ? new TextRun({ text: ` · ${entry.company}`, color: '555555' }) : new TextRun(''),
+                entry.company ? new TextRun({ text: ` · ${entry.company}`, color: secondaryColor }) : new TextRun(''),
               ],
             }),
             new Paragraph({
@@ -70,7 +71,7 @@ function buildDocxChildren(sections: CvSection[]): Paragraph[] {
             new Paragraph({
               children: [
                 new TextRun({ text: entry.degree, bold: true }),
-                entry.school ? new TextRun({ text: ` · ${entry.school}`, color: '555555' }) : new TextRun(''),
+                entry.school ? new TextRun({ text: ` · ${entry.school}`, color: secondaryColor }) : new TextRun(''),
               ],
             }),
             new Paragraph({
@@ -136,10 +137,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Input validation
-    const { sections } = (await req.json()) as { sections: CvSection[] }
+    const { sections, templateKey } = (await req.json()) as { sections: CvSection[], templateKey?: string }
     if (!Array.isArray(sections) || sections.length > 20) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
     }
+
+    const { docx: theme } = getTemplate(templateKey ?? 'classic')
 
     const doc = new Document({
       sections: [{
@@ -148,20 +151,20 @@ export async function POST(req: NextRequest) {
             margin: { top: 1134, bottom: 1134, left: 1134, right: 1134 }, // ~2cm
           },
         },
-        children: buildDocxChildren(sections),
+        children: buildDocxChildren(sections, theme.secondaryColor),
       }],
       styles: {
         paragraphStyles: [
           {
             id: 'Heading1',
             name: 'Heading 1',
-            run: { size: 44, bold: true, color: '111111' },
+            run: { size: 44, bold: true, color: theme.heading1Color },
             paragraph: { spacing: { after: 120 } },
           },
           {
             id: 'Heading2',
             name: 'Heading 2',
-            run: { size: 18, bold: true, color: '666666', allCaps: true },
+            run: { size: 18, bold: true, color: theme.heading2Color, allCaps: true },
             paragraph: { spacing: { before: 280, after: 120 }, border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'dddddd' } } },
           },
         ],
