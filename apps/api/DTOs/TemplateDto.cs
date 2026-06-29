@@ -5,5 +5,5 @@ public record TemplateDto(
     string Name,
     string TemplateKey,
     bool IsPremium,
-    string? PreviewUrl
+    bool IsActive
 );

@@ -26,7 +26,8 @@ export async function middleware(request: NextRequest) {
   // /cv/nouveau est public (lazy registration) ; seuls /cv/[id]/* sont protégés
   const isDashboard = pathname.startsWith('/dashboard')
   const isCvRoute = pathname.startsWith('/cv/') && !pathname.startsWith('/cv/nouveau')
-  if (!user && (isDashboard || isCvRoute)) {
+  const isAdmin = pathname.startsWith('/admin')
+  if (!user && (isDashboard || isCvRoute || isAdmin)) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('returnTo', pathname)
     return NextResponse.redirect(loginUrl)

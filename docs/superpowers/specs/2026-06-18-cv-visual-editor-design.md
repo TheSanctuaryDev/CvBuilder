@@ -91,7 +91,7 @@ export type EditorAction =
 
 ### Helpers de conversion (`lib/cv-sections.ts`)
 
-- `cvDataToSections(data: CvData): CvSection[]` — convertit le format DB plat vers les objets structurés. Les strings `experience[]` existantes deviennent des `ExperienceEntry` avec parsing heuristique.
+- `cvDataToSections(data: CvData): CvSection[]` — convertit le format DB plat vers les objets structurés. Les strings `experience[]` existantes deviennent des `ExperienceEntry` avec la string complète dans le champ `description` et les champs `title`, `company`, `startDate`, `endDate` laissés vides — l'utilisateur les complète dans l'éditeur.
 - `sectionsToCvData(sections: CvSection[]): CvData` — inverse, pour sauvegarder en DB via l'API .NET existante. Pas de breaking change sur l'API.
 
 ---

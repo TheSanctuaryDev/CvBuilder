@@ -27,6 +27,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // FedaPay
 builder.Services.AddHttpClient<FedaPayService>();
 
+// AI Services
+builder.Services.AddHttpClient<ClaudeAiService>();
+builder.Services.AddHttpClient<GeminiAiService>();
+builder.Services.AddScoped<AiProviderResolver>();
+
 // JWT Auth Supabase (HS256)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

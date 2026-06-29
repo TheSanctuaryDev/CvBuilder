@@ -88,6 +88,16 @@ CREATE TABLE IF NOT EXISTS admin_users (
   user_id  UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE
 );
 
+-- Paramètres applicatifs (clé/valeur)
+CREATE TABLE IF NOT EXISTS app_settings (
+  key         TEXT        PRIMARY KEY,
+  value       TEXT        NOT NULL,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Valeur par défaut : Claude
+INSERT INTO app_settings (key, value) VALUES ('ai_provider', 'claude') ON CONFLICT DO NOTHING;
+
 -- =============================================================================
 -- INDEX DE PERFORMANCE
 -- =============================================================================

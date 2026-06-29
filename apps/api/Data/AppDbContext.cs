@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Template> Templates => Set<Template>();
     public DbSet<TemplateBlueprintCache> BlueprintCaches => Set<TemplateBlueprintCache>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
+    public DbSet<AppSetting> AppSettings => Set<AppSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +28,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(c => c.TemplateKey).IsUnique();
         modelBuilder.Entity<AdminUser>().ToTable("admin_users")
             .HasKey(a => a.UserId);
+        modelBuilder.Entity<AppSetting>().ToTable("app_settings")
+            .HasKey(s => s.Key);
 
         // Snake_case pour PostgreSQL
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
