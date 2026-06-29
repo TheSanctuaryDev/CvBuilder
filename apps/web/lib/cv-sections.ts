@@ -135,3 +135,16 @@ export function sectionsToCvData(sections: CvSection[]): Partial<CvData> & { ful
 
   return result
 }
+
+/**
+ * Détecte le format des données CV et retourne les sections.
+ * Nouveau format : { sections: CvSection[] } stocké directement.
+ * Ancien format  : CvData (champs fullName, experience[], etc.) — rétrocompatible.
+ */
+export function rawDataToSections(data: Record<string, unknown> | null | undefined): CvSection[] {
+  if (!data) return []
+  if (Array.isArray((data as Record<string, unknown>).sections)) {
+    return (data as { sections: CvSection[] }).sections
+  }
+  return cvDataToSections(data as unknown as CvData)
+}

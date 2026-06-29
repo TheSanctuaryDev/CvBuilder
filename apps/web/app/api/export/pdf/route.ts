@@ -1,28 +1,48 @@
 // apps/web/app/api/export/pdf/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { renderToStaticMarkup } from 'react-dom/server'
-import type { CvSection } from '@/types/editor'
-import HeaderSectionView from '@/components/cv-sections/HeaderSectionView'
-import SummarySectionView from '@/components/cv-sections/SummarySectionView'
-import ExperienceSectionView from '@/components/cv-sections/ExperienceSectionView'
-import FormationSectionView from '@/components/cv-sections/FormationSectionView'
-import SkillsSectionView from '@/components/cv-sections/SkillsSectionView'
-import LanguagesSectionView from '@/components/cv-sections/LanguagesSectionView'
-import InterestsSectionView from '@/components/cv-sections/InterestsSectionView'
-import ReferencesSectionView from '@/components/cv-sections/ReferencesSectionView'
-import { parseTokens, generatePdfCss, type StyleTokens } from '@/components/templates/registry'
-import React from 'react'
+export const runtime = 'nodejs'
 
-function renderSectionToMarkup(section: CvSection): string {
+import { NextRequest, NextResponse } from 'next/server'
+import type { CvSection } from '@/types/editor'
+import { parseTokens, generatePdfCss, type StyleTokens } from '@/components/templates/registry'
+
+async function renderSectionToMarkup(section: CvSection): Promise<string> {
+  // Import dynamique pour éviter la détection statique de react-dom/server par Next.js
+  const { renderToStaticMarkup } = await import('react-dom/server')
+  const React = (await import('react')).default
+
   switch (section.type) {
-    case 'header': return renderToStaticMarkup(React.createElement(HeaderSectionView, { section }))
-    case 'summary': return renderToStaticMarkup(React.createElement(SummarySectionView, { section }))
-    case 'experience': return renderToStaticMarkup(React.createElement(ExperienceSectionView, { section }))
-    case 'formation': return renderToStaticMarkup(React.createElement(FormationSectionView, { section }))
-    case 'skills': return renderToStaticMarkup(React.createElement(SkillsSectionView, { section }))
-    case 'languages': return renderToStaticMarkup(React.createElement(LanguagesSectionView, { section }))
-    case 'interests': return renderToStaticMarkup(React.createElement(InterestsSectionView, { section }))
-    case 'references': return renderToStaticMarkup(React.createElement(ReferencesSectionView, { section }))
+    case 'header': {
+      const { default: V } = await import('@/components/cv-sections/HeaderSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
+    case 'summary': {
+      const { default: V } = await import('@/components/cv-sections/SummarySectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
+    case 'experience': {
+      const { default: V } = await import('@/components/cv-sections/ExperienceSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
+    case 'formation': {
+      const { default: V } = await import('@/components/cv-sections/FormationSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
+    case 'skills': {
+      const { default: V } = await import('@/components/cv-sections/SkillsSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
+    case 'languages': {
+      const { default: V } = await import('@/components/cv-sections/LanguagesSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
+    case 'interests': {
+      const { default: V } = await import('@/components/cv-sections/InterestsSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
+    case 'references': {
+      const { default: V } = await import('@/components/cv-sections/ReferencesSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
     default: return ''
   }
 }
@@ -53,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     const tokens = parseTokens(styleTokens ? JSON.stringify(styleTokens) : null)
     const sorted = [...sections].sort((a, b) => a.order - b.order)
-    const sectionsHtml = sorted.map(renderSectionToMarkup).join('\n')
+    const sectionsHtml = (await Promise.all(sorted.map(renderSectionToMarkup))).join('\n')
 
     const html = `<!DOCTYPE html>
 <html lang="fr">

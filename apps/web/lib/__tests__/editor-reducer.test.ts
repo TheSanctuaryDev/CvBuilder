@@ -15,6 +15,8 @@ const makeState = (overrides: Partial<EditorState> = {}): EditorState => ({
   ],
   activeSectionId: null,
   isDirty: false,
+  past: [],
+  future: [],
   ...overrides,
 })
 

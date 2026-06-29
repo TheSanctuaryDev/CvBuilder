@@ -29,13 +29,22 @@ interface CVPreviewProps {
   styleTokens?: StyleTokens
 }
 
-export default function CVPreview({ sections, activeSectionId, dispatch, isDragDisabled, templateKey = 'classic', styleTokens }: CVPreviewProps) {
+export default function CVPreview({
+  sections,
+  activeSectionId,
+  dispatch,
+  isDragDisabled,
+  templateKey = 'classic',
+  styleTokens,
+}: CVPreviewProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
   const sorted = [...sections].sort((a, b) => a.order - b.order)
+  // Les sections masquées ne s'affichent pas dans le rendu A4
+  const visible = sorted.filter(s => !s.hidden)
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -58,10 +67,17 @@ export default function CVPreview({ sections, activeSectionId, dispatch, isDragD
       className="bg-white shadow-2xl mx-auto"
       style={{ width: 794, minHeight: 1123, padding: '60px 72px', ...cssVars }}
     >
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={sorted.map(s => s.id)} strategy={verticalListSortingStrategy}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={sorted.map(s => s.id)}
+          strategy={verticalListSortingStrategy}
+        >
           <div className="space-y-1">
-            {sorted.map(section => (
+            {visible.map(section => (
               <SectionBlock
                 key={section.id}
                 section={section}
