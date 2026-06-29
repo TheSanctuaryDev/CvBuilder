@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using CvBuilderApi.Data;
 using CvBuilderApi.DTOs;
 using CvBuilderApi.Models;
@@ -124,11 +125,21 @@ public class AdminController(AppDbContext db) : ControllerBase
             _            => "jpg",
         };
 
+        // Valider que la clé ne contient que des caractères sûrs (évite path traversal)
+        if (!Regex.IsMatch(template.TemplateKey, @"^[a-z0-9\-]+$"))
+            return BadRequest("Clé de template invalide.");
+
         var dir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template-previews");
         Directory.CreateDirectory(dir);
 
         var fileName = $"{template.TemplateKey}.{ext}";
         var filePath = Path.Combine(dir, fileName);
+
+        // Vérification canonique : le fichier doit rester dans le répertoire cible
+        var canonicalDir = Path.GetFullPath(dir) + Path.DirectorySeparatorChar;
+        var canonicalFile = Path.GetFullPath(filePath);
+        if (!canonicalFile.StartsWith(canonicalDir, StringComparison.Ordinal))
+            return BadRequest("Chemin de fichier invalide.");
 
         await using var stream = new FileStream(filePath, FileMode.Create);
         await file.CopyToAsync(stream);
