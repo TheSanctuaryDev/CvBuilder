@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using CvBuilderApi.Data;
 using CvBuilderApi.DTOs;
@@ -12,7 +13,7 @@ namespace CvBuilderApi.Controllers;
 [ApiController]
 [Route("api/admin")]
 [Authorize]
-public class AdminController(AppDbContext db) : ControllerBase
+public partial class AdminController(AppDbContext db) : ControllerBase
 {
     private Guid? CurrentUserId
     {
@@ -21,6 +22,47 @@ public class AdminController(AppDbContext db) : ControllerBase
             var value = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
             return Guid.TryParse(value, out var id) ? id : null;
         }
+    }
+
+    [GeneratedRegex(@"^#[0-9a-fA-F]{6}$")]
+    private static partial Regex HexColorRegex();
+
+    private static readonly HashSet<string> AllowedFonts = ["serif", "sans-serif"];
+    private static readonly HashSet<string> AllowedWidths = ["1", "2"];
+
+    // Valide et sanitise les style_tokens avant stockage (prévient CSS injection dans le PDF)
+    private static string? SanitizeStyleTokens(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        try
+        {
+            using var doc = JsonDocument.Parse(raw);
+            var root = doc.RootElement;
+
+            string SafeColor(string key, string def)
+            {
+                if (root.TryGetProperty(key, out var el) && HexColorRegex().IsMatch(el.GetString() ?? ""))
+                    return el.GetString()!;
+                return def;
+            }
+            string SafeEnum(string key, HashSet<string> allowed, string def)
+            {
+                if (root.TryGetProperty(key, out var el) && allowed.Contains(el.GetString() ?? ""))
+                    return el.GetString()!;
+                return def;
+            }
+
+            var sanitized = new
+            {
+                fontFamily   = SafeEnum("fontFamily",   AllowedFonts,   "serif"),
+                nameColor    = SafeColor("nameColor",    "#111111"),
+                accentColor  = SafeColor("accentColor",  "#6b7280"),
+                dividerColor = SafeColor("dividerColor", "#d1d5db"),
+                dividerWidth = SafeEnum("dividerWidth",  AllowedWidths,  "1"),
+            };
+            return System.Text.Json.JsonSerializer.Serialize(sanitized);
+        }
+        catch { return null; }
     }
 
     private async Task<bool> IsAdminAsync()
@@ -170,7 +212,7 @@ public class AdminController(AppDbContext db) : ControllerBase
             IsActive = true,
             PreviewUrl = req.PreviewUrl?.Trim(),
         };
-        if (req.StyleTokens is { } st) template.StyleTokens = st.Trim();
+        if (req.StyleTokens is { } st) template.StyleTokens = SanitizeStyleTokens(st) ?? template.StyleTokens;
 
         db.Templates.Add(template);
         await db.SaveChangesAsync();
@@ -193,7 +235,7 @@ public class AdminController(AppDbContext db) : ControllerBase
         if (req.Name is { } name) template.Name = name.Trim();
         if (req.TemplateKey is { } key) template.TemplateKey = key.Trim().ToLower();
         if (req.PreviewUrl is { } url) template.PreviewUrl = url.Trim();
-        if (req.StyleTokens is { } tokens) template.StyleTokens = tokens.Trim();
+        if (req.StyleTokens is { } tokens) template.StyleTokens = SanitizeStyleTokens(tokens) ?? template.StyleTokens;
 
         await db.SaveChangesAsync();
         return NoContent();

@@ -14,11 +14,36 @@ export const DEFAULT_TOKENS: StyleTokens = {
   dividerWidth: '1',
 }
 
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/
+const ALLOWED_FONT_FAMILY = new Set<string>(['serif', 'sans-serif'])
+const ALLOWED_DIVIDER_WIDTH = new Set<string>(['1', '2'])
+
+function sanitizeTokens(raw: Record<string, unknown>): StyleTokens {
+  return {
+    fontFamily: ALLOWED_FONT_FAMILY.has(String(raw.fontFamily ?? ''))
+      ? (raw.fontFamily as StyleTokens['fontFamily'])
+      : DEFAULT_TOKENS.fontFamily,
+    nameColor: HEX_COLOR_RE.test(String(raw.nameColor ?? ''))
+      ? String(raw.nameColor)
+      : DEFAULT_TOKENS.nameColor,
+    accentColor: HEX_COLOR_RE.test(String(raw.accentColor ?? ''))
+      ? String(raw.accentColor)
+      : DEFAULT_TOKENS.accentColor,
+    dividerColor: HEX_COLOR_RE.test(String(raw.dividerColor ?? ''))
+      ? String(raw.dividerColor)
+      : DEFAULT_TOKENS.dividerColor,
+    dividerWidth: ALLOWED_DIVIDER_WIDTH.has(String(raw.dividerWidth ?? ''))
+      ? (raw.dividerWidth as StyleTokens['dividerWidth'])
+      : DEFAULT_TOKENS.dividerWidth,
+  }
+}
+
 export function parseTokens(raw: string | null | undefined): StyleTokens {
   try {
     if (!raw) return DEFAULT_TOKENS
     const parsed = JSON.parse(raw)
-    return { ...DEFAULT_TOKENS, ...parsed }
+    if (typeof parsed !== 'object' || parsed === null) return DEFAULT_TOKENS
+    return sanitizeTokens(parsed)
   } catch {
     return DEFAULT_TOKENS
   }
