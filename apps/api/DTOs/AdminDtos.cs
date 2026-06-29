@@ -32,6 +32,8 @@ public record AdminPaymentDto(
     DateTime CreatedAt
 );
 
-public record PatchTemplateRequest(bool? IsActive, bool? IsPremium, string? Name);
+public record CreateTemplateRequest(string Name, string TemplateKey, bool IsPremium, string? PreviewUrl);
+
+public record PatchTemplateRequest(bool? IsActive, bool? IsPremium, string? Name, string? TemplateKey, string? PreviewUrl);
 
 public record PatchSettingRequest(string Value);

@@ -102,6 +102,34 @@ public class AdminController(AppDbContext db) : ControllerBase
         return Ok(templates);
     }
 
+    [HttpPost("templates")]
+    public async Task<ActionResult<TemplateDto>> CreateTemplate(CreateTemplateRequest req)
+    {
+        if (!await IsAdminAsync()) return Forbid();
+
+        if (string.IsNullOrWhiteSpace(req.Name) || string.IsNullOrWhiteSpace(req.TemplateKey))
+            return BadRequest("Name et TemplateKey sont requis.");
+
+        var exists = await db.Templates.AnyAsync(t => t.TemplateKey == req.TemplateKey);
+        if (exists) return Conflict("Un template avec cette clé existe déjà.");
+
+        var template = new Template
+        {
+            Name = req.Name.Trim(),
+            TemplateKey = req.TemplateKey.Trim().ToLower(),
+            IsPremium = req.IsPremium,
+            IsActive = true,
+            PreviewUrl = req.PreviewUrl?.Trim(),
+        };
+
+        db.Templates.Add(template);
+        await db.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetTemplates), null,
+            new TemplateDto(template.Id, template.Name, template.TemplateKey,
+                template.IsPremium, template.IsActive, template.PreviewUrl));
+    }
+
     [HttpPatch("templates/{id:guid}")]
     public async Task<IActionResult> PatchTemplate(Guid id, PatchTemplateRequest req)
     {
@@ -112,8 +140,26 @@ public class AdminController(AppDbContext db) : ControllerBase
 
         if (req.IsActive.HasValue) template.IsActive = req.IsActive.Value;
         if (req.IsPremium.HasValue) template.IsPremium = req.IsPremium.Value;
-        if (req.Name is { } name) template.Name = name;
+        if (req.Name is { } name) template.Name = name.Trim();
+        if (req.TemplateKey is { } key) template.TemplateKey = key.Trim().ToLower();
+        if (req.PreviewUrl is { } url) template.PreviewUrl = url.Trim();
 
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("templates/{id:guid}")]
+    public async Task<IActionResult> DeleteTemplate(Guid id)
+    {
+        if (!await IsAdminAsync()) return Forbid();
+
+        var template = await db.Templates.FindAsync(id);
+        if (template == null) return NotFound();
+
+        var inUse = await db.Cvs.AnyAsync(c => c.TemplateKey == template.TemplateKey);
+        if (inUse) return Conflict("Ce template est utilisé par au moins un CV. Désactivez-le plutôt que de le supprimer.");
+
+        db.Templates.Remove(template);
         await db.SaveChangesAsync();
         return NoContent();
     }
