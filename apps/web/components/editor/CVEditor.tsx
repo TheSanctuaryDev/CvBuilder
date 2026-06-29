@@ -4,6 +4,10 @@
 import { useReducer, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import {
+  Check, Circle, Loader2, AlertTriangle, ArrowLeft,
+  Download, ChevronUp, ChevronDown,
+} from 'lucide-react'
 import { editorReducer } from '@/lib/editor-reducer'
 import { cvDataToSections, sectionsToCvData } from '@/lib/cv-sections'
 import CVPreview from './CVPreview'
@@ -41,6 +45,10 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
     isDirty: false,
   } satisfies EditorState)
 
+  // Ref toujours à jour — évite la closure stale dans le debounce auto-save
+  const sectionsRef = useRef(state.sections)
+  useEffect(() => { sectionsRef.current = state.sections }, [state.sections])
+
   // Chargement initial
   useEffect(() => {
     async function load() {
@@ -76,7 +84,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
       setSaveStatus('saving')
       try {
         const auth = await getAuthHeader()
-        const cvData = sectionsToCvData(state.sections)
+        const cvData = sectionsToCvData(sectionsRef.current)
         await fetch(`${API_URL}/api/cvs/${cvId}`, {
           method: 'PATCH',
           headers: { Authorization: auth, 'Content-Type': 'application/json' },
@@ -91,7 +99,7 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [state.isDirty, state.sections, cvId])
+  }, [state.isDirty, cvId])
 
   async function exportPdf() {
     const auth = await getAuthHeader()
@@ -135,18 +143,11 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
     )
   }
 
-  const saveLabel = {
-    saved: '✓ Sauvegardé',
-    dirty: '● Modifications non sauvegardées',
-    saving: '↑ Sauvegarde…',
-    error: '⚠ Erreur de sauvegarde',
-  }[saveStatus]
-
-  const saveColor = {
-    saved: 'text-neutral-500',
-    dirty: 'text-neutral-300',
-    saving: 'text-neutral-400',
-    error: 'text-red-400',
+  const saveIndicator = {
+    saved:  { icon: <Check className="w-3.5 h-3.5" />,              label: 'Sauvegardé',                   color: 'text-neutral-500' },
+    dirty:  { icon: <Circle className="w-2.5 h-2.5 fill-current" />, label: 'Modifications non sauvegardées', color: 'text-neutral-300' },
+    saving: { icon: <Loader2 className="w-3.5 h-3.5 animate-spin" />, label: 'Sauvegarde…',                  color: 'text-neutral-400' },
+    error:  { icon: <AlertTriangle className="w-3.5 h-3.5" />,       label: 'Erreur de sauvegarde',          color: 'text-red-400' },
   }[saveStatus]
 
   return (
@@ -155,23 +156,25 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
       <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800 bg-neutral-950 shrink-0">
         <button
           onClick={() => router.push(`/cv/${cvId}`)}
-          className="text-neutral-400 hover:text-white text-sm transition"
+          className="flex items-center gap-1.5 text-neutral-400 hover:text-white text-sm transition"
         >
-          ← Retour
+          <ArrowLeft className="w-4 h-4" /> Retour
         </button>
-        <span className={`text-xs ${saveColor} hidden sm:inline`}>{saveLabel}</span>
+        <span className={`flex items-center gap-1.5 text-xs ${saveIndicator.color} hidden sm:flex`}>
+          {saveIndicator.icon} {saveIndicator.label}
+        </span>
         <div className="flex gap-2">
           <button
             onClick={exportPdf}
-            className="text-sm bg-white text-black font-semibold px-4 py-1.5 rounded-lg hover:bg-neutral-200 transition"
+            className="flex items-center gap-1.5 text-sm bg-white text-black font-semibold px-4 py-1.5 rounded-lg hover:bg-neutral-200 transition"
           >
-            ↓ PDF
+            <Download className="w-3.5 h-3.5" /> PDF
           </button>
           <button
             onClick={exportDocx}
-            className="text-sm border border-neutral-700 text-white px-4 py-1.5 rounded-lg hover:border-neutral-500 transition"
+            className="flex items-center gap-1.5 text-sm border border-neutral-700 text-white px-4 py-1.5 rounded-lg hover:border-neutral-500 transition"
           >
-            ↓ Word
+            <Download className="w-3.5 h-3.5" /> Word
           </button>
         </div>
       </div>
@@ -273,9 +276,9 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
                     ;[ids[idx - 1], ids[idx]] = [ids[idx], ids[idx - 1]]
                     dispatch({ type: 'REORDER', ids })
                   }}
-                  className="text-xs text-neutral-400 hover:text-white disabled:opacity-30 transition px-1"
+                  className="text-neutral-400 hover:text-white disabled:opacity-30 transition px-1"
                 >
-                  ↑
+                  <ChevronUp className="w-4 h-4" />
                 </button>
                 <button
                   disabled={idx === arr.length - 1}
@@ -284,9 +287,9 @@ export default function CVEditor({ cvId, templateKey, title }: CVEditorProps) {
                     ;[ids[idx], ids[idx + 1]] = [ids[idx + 1], ids[idx]]
                     dispatch({ type: 'REORDER', ids })
                   }}
-                  className="text-xs text-neutral-400 hover:text-white disabled:opacity-30 transition px-1"
+                  className="text-neutral-400 hover:text-white disabled:opacity-30 transition px-1"
                 >
-                  ↓
+                  <ChevronDown className="w-4 h-4" />
                 </button>
               </div>
             </div>

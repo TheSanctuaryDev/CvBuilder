@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import PublicNav from '@/components/PublicNav'
 import Footer from '@/components/Footer'
+import { ArrowRight } from 'lucide-react'
 
 export default async function LandingPage() {
   const supabase = await createClient()
@@ -15,15 +16,15 @@ export default async function LandingPage() {
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-4 pt-14 sm:pt-24 pb-16 sm:pb-20 text-center">
           <span className="inline-block bg-white/10 text-white text-xs font-semibold px-3 py-1 rounded-full mb-6">
-            Alimenté par Claude AI
+            PDF · Word · 100% en ligne
           </span>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold leading-tight mb-6">
             Votre CV professionnel{' '}
             <span className="text-white block sm:inline">en quelques minutes</span>
           </h1>
           <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-            Renseignez vos informations, choisissez un template, et notre IA génère
-            un CV impeccable au format PDF — prêt à envoyer.
+            Renseignez vos informations, choisissez un template, et obtenez
+            un CV impeccable au format PDF ou Word — prêt à envoyer.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             {user ? (
@@ -31,7 +32,7 @@ export default async function LandingPage() {
                 href="/dashboard"
                 className="bg-white text-black font-semibold px-8 py-3 rounded-xl hover:bg-neutral-200 transition text-lg"
               >
-                Mon dashboard →
+                Mon dashboard <ArrowRight className="inline w-4 h-4 ml-1" />
               </Link>
             ) : (
               <>
@@ -60,7 +61,7 @@ export default async function LandingPage() {
               {[
                 { step: '01', title: 'Choisissez un template', desc: 'Sélectionnez parmi nos 15 templates professionnels — 2 gratuits, 13 premium.' },
                 { step: '02', title: 'Renseignez vos infos', desc: 'Complétez le formulaire guidé : expériences, formation, compétences.' },
-                { step: '03', title: 'Téléchargez votre PDF', desc: 'Claude AI génère votre CV en HTML optimisé, converti en PDF propre.' },
+                { step: '03', title: 'Téléchargez votre CV', desc: 'Exportez en PDF ou Word en un clic — mise en page soignée, prêt à envoyer.' },
               ].map(({ step, title, desc }) => (
                 <div key={step} className="text-center">
                   <div className="text-4xl font-serif text-white mb-3">{step}</div>

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json;
 using CvBuilderApi.Data;
 using CvBuilderApi.DTOs;
 using CvBuilderApi.Models;
@@ -13,14 +14,19 @@ namespace CvBuilderApi.Controllers;
 [Authorize]
 public class CvsController(AppDbContext db) : ControllerBase
 {
-    private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new UnauthorizedAccessException());
+    private Guid? CurrentUserId
+    {
+        get
+        {
+            var value = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Guid.TryParse(value, out var id) ? id : null;
+        }
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CvDto>>> GetCvs()
     {
-        var userId = CurrentUserId;
+        if (CurrentUserId is not Guid userId) return Unauthorized();
         var cvs = await db.Cvs
             .Where(c => c.UserId == userId)
             .OrderByDescending(c => c.UpdatedAt)
@@ -33,22 +39,59 @@ public class CvsController(AppDbContext db) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<CvDto>> GetCv(Guid id)
+    public async Task<ActionResult<CvDetailDto>> GetCv(Guid id)
     {
-        var userId = CurrentUserId;
+        if (CurrentUserId is not Guid userId) return Unauthorized();
         var cv = await db.Cvs.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
-
         if (cv == null) return NotFound();
 
-        return Ok(new CvDto(
+        var latestVersion = await db.CvVersions
+            .Where(v => v.CvId == id && v.VersionNum == cv.CurrentVersion)
+            .FirstOrDefaultAsync();
+
+        JsonElement? cvData = null;
+        if (latestVersion?.CvData is { } raw && raw != "{}")
+        {
+            try { cvData = JsonSerializer.Deserialize<JsonElement>(raw); }
+            catch { /* CvData corrompu — on retourne null */ }
+        }
+
+        return Ok(new CvDetailDto(
             cv.Id, cv.Title, cv.TemplateKey, cv.IsPremium,
-            cv.IsPaid, cv.CurrentVersion, cv.CreatedAt, cv.UpdatedAt));
+            cv.IsPaid, cv.CurrentVersion, cv.CreatedAt, cv.UpdatedAt,
+            cvData));
+    }
+
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> PatchCv(Guid id, PatchCvRequest request)
+    {
+        if (CurrentUserId is not Guid userId) return Unauthorized();
+        var cv = await db.Cvs.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+        if (cv == null) return NotFound();
+
+        var cvDataJson = request.CvData.GetRawText();
+
+        var version = await db.CvVersions
+            .FirstOrDefaultAsync(v => v.CvId == id && v.VersionNum == cv.CurrentVersion);
+
+        if (version == null)
+        {
+            db.CvVersions.Add(new CvVersion { CvId = id, VersionNum = cv.CurrentVersion, CvData = cvDataJson });
+        }
+        else
+        {
+            version.CvData = cvDataJson;
+        }
+
+        cv.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return NoContent();
     }
 
     [HttpPost]
     public async Task<ActionResult<CvDto>> CreateCv(CreateCvRequest request)
     {
-        var userId = CurrentUserId;
+        if (CurrentUserId is not Guid userId) return Unauthorized();
 
         // Créer le profil si inexistant (première action de l'utilisateur)
         if (!await db.Profiles.AnyAsync(p => p.Id == userId))
@@ -78,7 +121,7 @@ public class CvsController(AppDbContext db) : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCv(Guid id)
     {
-        var userId = CurrentUserId;
+        if (CurrentUserId is not Guid userId) return Unauthorized();
         var cv = await db.Cvs.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
 
         if (cv == null) return NotFound();

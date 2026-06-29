@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using CvBuilderApi.Data;
+using CvBuilderApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +20,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Base de données PostgreSQL (Supabase)
+// Base de données PostgreSQL (VPS)
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Supabase")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// FedaPay
+builder.Services.AddHttpClient<FedaPayService>();
 
 // JWT Auth Supabase (HS256)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

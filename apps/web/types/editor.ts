@@ -16,8 +16,8 @@ export type HeaderSection = {
   order: number
   fullName: string
   jobTitle: string
-  email?: string
-  phone?: string
+  emails?: string[]
+  phones?: import('@/types').PhoneEntry[]
   address?: string
   linkedIn?: string
   gitHub?: string

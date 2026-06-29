@@ -12,7 +12,7 @@ function buildDocxChildren(sections: CvSection[]): Paragraph[] {
 
   for (const section of sorted) {
     switch (section.type) {
-      case 'header':
+      case 'header': {
         paras.push(
           new Paragraph({
             text: section.fullName,
@@ -22,14 +22,19 @@ function buildDocxChildren(sections: CvSection[]): Paragraph[] {
             children: [new TextRun({ text: section.jobTitle, color: '555555' })],
           })
         )
-        const contacts = [section.email, section.phone, section.address, section.linkedIn, section.gitHub]
-          .filter(Boolean)
-          .join('  |  ')
+        const contacts = [
+          ...(section.emails?.filter(Boolean) ?? []),
+          ...(section.phones?.filter(p => p.number).map(p => `${p.indicatif} ${p.number}`) ?? []),
+          section.address,
+          section.linkedIn,
+          section.gitHub,
+        ].filter(Boolean).join('  |  ')
         if (contacts) {
           paras.push(new Paragraph({ children: [new TextRun({ text: contacts, size: 18, color: '888888' })] }))
         }
         paras.push(new Paragraph({ text: '' }))
         break
+      }
 
       case 'summary':
         paras.push(

@@ -15,16 +15,15 @@ import type {
 
 export function cvDataToSections(data: CvData): CvSection[] {
   const sections: CvSection[] = []
-  let order = 0
 
   const header: HeaderSection = {
     id: nanoid(),
     type: 'header',
-    order: order++,
+    order: 0,
     fullName: data.fullName,
     jobTitle: data.fieldOfActivity ?? '',
-    email: data.email,
-    phone: data.phone,
+    emails: data.emails?.length ? data.emails : [],
+    phones: data.phones?.length ? data.phones : [],
     address: data.address,
     linkedIn: data.linkedIn,
     gitHub: data.gitHub,
@@ -32,78 +31,74 @@ export function cvDataToSections(data: CvData): CvSection[] {
   sections.push(header)
 
   if (data.summary) {
-    const summary: SummarySection = {
-      id: nanoid(), type: 'summary', order: order++, text: data.summary,
-    }
-    sections.push(summary)
+    sections.push({ id: nanoid(), type: 'summary', order: 0, text: data.summary } satisfies SummarySection)
   }
 
   if (data.experience?.length) {
-    const experience: ExperienceSection = {
+    sections.push({
       id: nanoid(),
       type: 'experience',
-      order: order++,
+      order: 0,
       entries: data.experience.map(exp => ({
         id: nanoid(), title: '', company: '', startDate: '', endDate: '', description: exp,
       })),
-    }
-    sections.push(experience)
+    } satisfies ExperienceSection)
   }
 
   if (data.formation?.length) {
-    const formation: FormationSection = {
+    sections.push({
       id: nanoid(),
       type: 'formation',
-      order: order++,
+      order: 0,
       entries: data.formation.map(f => ({
         id: nanoid(), degree: '', school: '', year: '', description: f,
       })),
-    }
-    sections.push(formation)
+    } satisfies FormationSection)
   }
 
   if (data.skills?.length) {
-    const skills: SkillsSection = {
-      id: nanoid(), type: 'skills', order: order++, items: data.skills,
-    }
-    sections.push(skills)
+    sections.push({ id: nanoid(), type: 'skills', order: 0, items: data.skills } satisfies SkillsSection)
   }
 
   if (data.languages) {
-    const languages: LanguagesSection = {
-      id: nanoid(), type: 'languages', order: order++, items: [data.languages],
-    }
-    sections.push(languages)
+    sections.push({ id: nanoid(), type: 'languages', order: 0, items: [data.languages] } satisfies LanguagesSection)
   }
 
   if (data.interests?.length) {
-    const interests: InterestsSection = {
-      id: nanoid(), type: 'interests', order: order++, items: data.interests,
-    }
-    sections.push(interests)
+    sections.push({ id: nanoid(), type: 'interests', order: 0, items: data.interests } satisfies InterestsSection)
   }
 
   if (data.references?.length) {
-    const references: ReferencesSection = {
-      id: nanoid(), type: 'references', order: order++, items: data.references,
-    }
-    sections.push(references)
+    sections.push({ id: nanoid(), type: 'references', order: 0, items: data.references } satisfies ReferencesSection)
   }
 
-  return sections
+  // Réappliquer l'ordre sauvegardé (drag-and-drop persisté)
+  if (data.sectionOrder?.length) {
+    const orderMap = new Map(data.sectionOrder.map((type, i) => [type, i]))
+    sections.sort((a, b) => {
+      const oa = orderMap.get(a.type) ?? 999
+      const ob = orderMap.get(b.type) ?? 999
+      return oa - ob
+    })
+  }
+
+  return sections.map((s, i) => ({ ...s, order: i }))
 }
 
 export function sectionsToCvData(sections: CvSection[]): Partial<CvData> & { fullName: string } {
   const sorted = [...sections].sort((a, b) => a.order - b.order)
-  const result: Partial<CvData> & { fullName: string } = { fullName: '' }
+  const result: Partial<CvData> & { fullName: string } = {
+    fullName: '',
+    sectionOrder: sorted.map(s => s.type),
+  }
 
   for (const section of sorted) {
     switch (section.type) {
       case 'header':
         result.fullName = section.fullName
         result.fieldOfActivity = section.jobTitle
-        result.email = section.email
-        result.phone = section.phone
+        result.emails = section.emails
+        result.phones = section.phones
         result.address = section.address
         result.linkedIn = section.linkedIn
         result.gitHub = section.gitHub

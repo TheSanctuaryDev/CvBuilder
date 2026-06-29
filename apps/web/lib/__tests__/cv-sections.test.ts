@@ -5,8 +5,8 @@ import type { CvData } from '@/types'
 
 const baseCvData: CvData = {
   fullName: 'Jean Dupont',
-  email: 'jean@test.com',
-  phone: '+229 97000000',
+  emails: ['jean@test.com'],
+  phones: [{ indicatif: '+229', number: '97000000' }],
   fieldOfActivity: 'Développeur Full Stack',
   summary: 'Expert React et .NET',
   experience: ['Développeur chez Acme (2022-2024)'],
@@ -22,7 +22,7 @@ describe('cvDataToSections', () => {
     expect(header).toBeDefined()
     if (header?.type !== 'header') return
     expect(header.fullName).toBe('Jean Dupont')
-    expect(header.email).toBe('jean@test.com')
+    expect(header.emails).toEqual(['jean@test.com'])
     expect(header.jobTitle).toBe('Développeur Full Stack')
   })
 
@@ -57,11 +57,11 @@ describe('cvDataToSections', () => {
 })
 
 describe('sectionsToCvData', () => {
-  it('round-trip : cvData → sections → cvData préserve fullName et email', () => {
+  it('round-trip : cvData → sections → cvData préserve fullName et emails', () => {
     const sections = cvDataToSections(baseCvData)
     const result = sectionsToCvData(sections)
     expect(result.fullName).toBe('Jean Dupont')
-    expect(result.email).toBe('jean@test.com')
+    expect(result.emails).toEqual(['jean@test.com'])
   })
 
   it('round-trip préserve skills', () => {

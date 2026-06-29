@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Settings, Menu, X as XIcon } from 'lucide-react'
 
 interface NavBarProps {
   userEmail?: string
@@ -35,11 +36,9 @@ export default function NavBar({ userEmail }: NavBarProps) {
           <Link href="/cv/nouveau" className="bg-white text-black text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-neutral-200 transition">
             + Nouveau CV
           </Link>
-          {userEmail && (
-            <span className="text-xs text-neutral-500">
-              {userEmail}
-            </span>
-          )}
+          <Link href="/settings" className="text-neutral-400 hover:text-white transition" title={userEmail ?? 'Paramètres'}>
+            <Settings className="w-4 h-4" />
+          </Link>
           <button onClick={handleLogout} className="text-sm text-neutral-400 hover:text-white transition">
             Déconnexion
           </button>
@@ -51,15 +50,7 @@ export default function NavBar({ userEmail }: NavBarProps) {
           onClick={() => setOpen(!open)}
           aria-label="Menu"
         >
-          {open ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
+          {open ? <XIcon className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
@@ -74,6 +65,9 @@ export default function NavBar({ userEmail }: NavBarProps) {
           </Link>
           <Link href="/cv/nouveau" onClick={() => setOpen(false)} className="text-center bg-white text-black text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-neutral-200 transition">
             + Nouveau CV
+          </Link>
+          <Link href="/settings" onClick={() => setOpen(false)} className="text-neutral-300 hover:text-white text-sm px-3 py-2.5 rounded-lg hover:bg-neutral-800 transition">
+            Paramètres
           </Link>
           <button
             onClick={() => { setOpen(false); handleLogout() }}

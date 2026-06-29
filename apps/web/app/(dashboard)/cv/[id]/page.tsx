@@ -1,6 +1,8 @@
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import PayButton from '@/components/PayButton'
+import { ChevronLeft, FileText, ArrowRight } from 'lucide-react'
 import type { Cv } from '@/types'
 
 async function getCv(id: string, token: string): Promise<Cv | null> {
@@ -18,8 +20,15 @@ async function getCv(id: string, token: string): Promise<Cv | null> {
   }
 }
 
-export default async function CvDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CvDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ payment?: string }>
+}) {
   const { id } = await params
+  const { payment } = await searchParams
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) redirect('/login')
@@ -31,11 +40,18 @@ export default async function CvDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Bannière succès paiement */}
+      {payment === 'success' && (
+        <div className="bg-green-950 border border-green-700 text-green-300 rounded-xl px-4 py-3 mb-6 text-sm">
+          Paiement validé — votre CV premium est maintenant débloqué.
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
-          <Link href="/dashboard" className="text-neutral-400 hover:text-white text-sm transition mb-2 inline-block">
-            ← Mes CVs
+          <Link href="/dashboard" className="inline-flex items-center gap-1 text-neutral-400 hover:text-white text-sm transition mb-2">
+            <ChevronLeft className="w-4 h-4" /> Mes CVs
           </Link>
           <h1 className="text-3xl font-serif">{cv.title}</h1>
           <p className="text-neutral-400 text-sm mt-1">Créé le {formatted}</p>
@@ -84,33 +100,25 @@ export default async function CvDetailPage({ params }: { params: Promise<{ id: s
 
       {/* PDF preview placeholder */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 mb-6 text-center">
-        <div className="text-4xl mb-3">📄</div>
-        <h2 className="font-semibold mb-2">Aperçu PDF</h2>
+        <FileText className="w-10 h-10 text-neutral-600 mx-auto mb-4" />
+        <h2 className="font-semibold mb-2">Aperçu du CV</h2>
         <p className="text-neutral-400 text-sm mb-4">
-          La génération IA et l&apos;aperçu PDF seront disponibles en Phase 3.
+          Ouvrez l&apos;éditeur pour modifier votre CV et l&apos;exporter en PDF ou Word.
         </p>
-        <span className="inline-block bg-neutral-800 text-neutral-400 text-xs px-3 py-1 rounded-full">
-          Phase 3 — Claude AI + Playwright PDF
-        </span>
+        <Link
+          href={`/cv/${cv.id}/edit`}
+          className="inline-flex items-center gap-2 bg-white text-black text-sm font-semibold px-5 py-2 rounded-lg hover:bg-neutral-200 transition"
+        >
+          Ouvrir l&apos;éditeur <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
-        <button
-          disabled
-          className="flex-1 bg-neutral-800 text-neutral-500 font-semibold py-3 rounded-xl cursor-not-allowed text-sm"
-        >
-          Générer avec l&apos;IA (Phase 3)
-        </button>
-        {cv.isPremium && !cv.isPaid && (
-          <button
-            disabled
-            className="flex-1 border border-white/30 text-white/40 font-semibold py-3 rounded-xl cursor-not-allowed text-sm"
-          >
-            Débloquer — 2000 FCFA (Phase 3)
-          </button>
-        )}
-      </div>
+      {cv.isPremium && !cv.isPaid && (
+        <div className="flex gap-3">
+          <PayButton cvId={cv.id} />
+        </div>
+      )}
     </div>
   )
 }

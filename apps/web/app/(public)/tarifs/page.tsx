@@ -1,5 +1,6 @@
 // apps/web/app/(public)/tarifs/page.tsx
 import Link from 'next/link'
+import { Check } from 'lucide-react'
 
 export default function TarifsPage() {
   return (
@@ -22,8 +23,8 @@ export default function TarifsPage() {
               'Téléchargement PDF',
               'Historique de vos CVs',
             ].map((f) => (
-              <li key={f} className="flex gap-2">
-                <span className="text-white">✓</span> {f}
+              <li key={f} className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-white shrink-0" /> {f}
               </li>
             ))}
           </ul>
@@ -51,8 +52,8 @@ export default function TarifsPage() {
               'Historique et versions',
               'Modification et régénération',
             ].map((f) => (
-              <li key={f} className="flex gap-2">
-                <span className="text-white">✓</span> {f}
+              <li key={f} className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-white shrink-0" /> {f}
               </li>
             ))}
           </ul>

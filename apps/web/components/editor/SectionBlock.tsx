@@ -3,6 +3,7 @@
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { GripVertical } from 'lucide-react'
 import type { CvSection } from '@/types/editor'
 import HeaderSectionView from '@/components/cv-sections/HeaderSectionView'
 import SummarySectionView from '@/components/cv-sections/SummarySectionView'
@@ -65,7 +66,7 @@ export default function SectionBlock({ section, isActive, onClick, isDragDisable
           onClick={e => e.stopPropagation()}
           className="absolute -left-6 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center cursor-grab active:cursor-grabbing p-1 text-neutral-400 hover:text-neutral-600"
         >
-          ⠿
+          <GripVertical className="w-4 h-4" />
         </div>
       )}
       {renderSection(section)}

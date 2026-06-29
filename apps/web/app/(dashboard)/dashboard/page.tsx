@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import CvCard from '@/components/CvCard'
 import Link from 'next/link'
+import { FileText, ArrowRight } from 'lucide-react'
 import type { Cv } from '@/types'
 
 async function getCvs(accessToken: string): Promise<Cv[]> {
@@ -35,16 +36,16 @@ export default async function DashboardPage() {
 
       {cvs.length === 0 ? (
         <div className="text-center py-20 bg-neutral-900 rounded-2xl border border-neutral-800">
-          <div className="text-4xl mb-4">📄</div>
+          <FileText className="w-10 h-10 text-neutral-600 mx-auto mb-4" />
           <h2 className="font-semibold text-lg mb-2">Aucun CV pour l&apos;instant</h2>
           <p className="text-neutral-400 text-sm mb-6">
             Créez votre premier CV professionnel en quelques minutes.
           </p>
           <Link
             href="/cv/nouveau"
-            className="bg-white text-black font-semibold text-sm px-6 py-3 rounded-xl hover:bg-neutral-200 transition"
+            className="inline-flex items-center gap-2 bg-white text-black font-semibold text-sm px-6 py-3 rounded-xl hover:bg-neutral-200 transition"
           >
-            Créer mon premier CV →
+            Créer mon premier CV <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       ) : (

@@ -1,12 +1,23 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { FileText } from 'lucide-react'
 
-export default function LoginPage() {
+function safeReturnTo(param: string | null): string {
+  if (!param) return '/dashboard'
+  if (param.startsWith('/') && !param.startsWith('//')) return param
+  return '/dashboard'
+}
+
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnTo = safeReturnTo(searchParams.get('returnTo'))
+  const fromWizard = returnTo === '/cv/nouveau'
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -26,12 +37,21 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push(returnTo)
     router.refresh()
   }
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8">
+      {fromWizard && (
+        <div className="flex items-start gap-3 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 mb-6">
+          <FileText className="w-4 h-4 text-neutral-400 mt-0.5 shrink-0" />
+          <p className="text-sm text-neutral-300">
+            Votre CV est prêt. Connectez-vous pour le finaliser — vous serez automatiquement redirigé.
+          </p>
+        </div>
+      )}
+
       <h2 className="text-xl font-semibold mb-6">Connexion</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -70,8 +90,21 @@ export default function LoginPage() {
 
       <p className="text-center text-neutral-400 text-sm mt-6">
         Pas encore de compte ?{' '}
-        <Link href="/register" className="text-white hover:underline">S&apos;inscrire</Link>
+        <Link
+          href={`/register${returnTo !== '/dashboard' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
+          className="text-white hover:underline"
+        >
+          S&apos;inscrire
+        </Link>
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
