@@ -102,6 +102,44 @@ public class AdminController(AppDbContext db) : ControllerBase
         return Ok(templates);
     }
 
+    [HttpPost("templates/{id:guid}/preview-image")]
+    public async Task<IActionResult> UploadPreviewImage(Guid id, IFormFile file)
+    {
+        if (!await IsAdminAsync()) return Forbid();
+
+        var template = await db.Templates.FindAsync(id);
+        if (template == null) return NotFound();
+
+        string[] allowed = ["image/png", "image/jpeg", "image/webp"];
+        if (!allowed.Contains(file.ContentType))
+            return BadRequest("Format invalide. Accepté : PNG, JPEG, WEBP.");
+
+        if (file.Length > 2 * 1024 * 1024)
+            return BadRequest("Image trop grande (max 2 Mo).");
+
+        var ext = file.ContentType switch
+        {
+            "image/png"  => "png",
+            "image/webp" => "webp",
+            _            => "jpg",
+        };
+
+        var dir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "template-previews");
+        Directory.CreateDirectory(dir);
+
+        var fileName = $"{template.TemplateKey}.{ext}";
+        var filePath = Path.Combine(dir, fileName);
+
+        await using var stream = new FileStream(filePath, FileMode.Create);
+        await file.CopyToAsync(stream);
+
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        template.PreviewUrl = $"{baseUrl}/template-previews/{fileName}";
+        await db.SaveChangesAsync();
+
+        return Ok(new { previewUrl = template.PreviewUrl });
+    }
+
     [HttpPost("templates")]
     public async Task<ActionResult<TemplateDto>> CreateTemplate(CreateTemplateRequest req)
     {

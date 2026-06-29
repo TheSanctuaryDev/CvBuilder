@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Loader2, Check, X, Cpu, Plus, Trash2, Pencil } from 'lucide-react'
+import { Loader2, Check, X, Cpu, Plus, Trash2, Pencil, ImageUp } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
 
@@ -30,7 +30,7 @@ export default function AdminTemplatesPage() {
   const [saving, setSaving] = useState<string | null>(null)
   const [aiSaving, setAiSaving] = useState(false)
 
-  // Formulaire création
+  // Création
   const [showCreate, setShowCreate] = useState(false)
   const [createForm, setCreateForm] = useState(emptyForm)
   const [creating, setCreating] = useState(false)
@@ -44,9 +44,12 @@ export default function AdminTemplatesPage() {
   // Suppression
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    load()
-  }, [])
+  // Upload image
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [pendingUpload, setPendingUpload] = useState<Template | null>(null)
+  const [uploadingId, setUploadingId] = useState<string | null>(null)
+
+  useEffect(() => { load() }, [])
 
   async function load() {
     const token = await getToken()
@@ -105,16 +108,8 @@ export default function AdminTemplatesPage() {
         previewUrl: createForm.previewUrl.trim() || null,
       }),
     })
-    if (res.status === 409) {
-      setCreateError('Cette clé de template existe déjà.')
-      setCreating(false)
-      return
-    }
-    if (!res.ok) {
-      setCreateError('Erreur lors de la création.')
-      setCreating(false)
-      return
-    }
+    if (res.status === 409) { setCreateError('Cette clé existe déjà.'); setCreating(false); return }
+    if (!res.ok) { setCreateError('Erreur lors de la création.'); setCreating(false); return }
     const created: Template = await res.json()
     setTemplates(prev => [...prev, created])
     setCreateForm(emptyForm)
@@ -150,20 +145,51 @@ export default function AdminTemplatesPage() {
   }
 
   async function handleDelete(t: Template) {
-    if (!confirm(`Supprimer le template "${t.name}" ? Cette action est irréversible.`)) return
+    if (!confirm(`Supprimer "${t.name}" ? Irréversible.`)) return
     setDeletingId(t.id)
     const token = await getToken()
     const res = await fetch(`${API_URL}/api/admin/templates/${t.id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     })
-    if (res.status === 409) {
-      alert('Ce template est utilisé par des CVs. Désactivez-le plutôt.')
-      setDeletingId(null)
-      return
-    }
+    if (res.status === 409) { alert('Template utilisé par des CVs. Désactivez-le plutôt.'); setDeletingId(null); return }
     setTemplates(prev => prev.filter(x => x.id !== t.id))
     setDeletingId(null)
+  }
+
+  function triggerUpload(t: Template) {
+    setPendingUpload(t)
+    fileInputRef.current?.click()
+  }
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !pendingUpload) return
+
+    setUploadingId(pendingUpload.id)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const token = await getToken()
+    const res = await fetch(`${API_URL}/api/admin/templates/${pendingUpload.id}/preview-image`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    })
+
+    if (res.ok) {
+      const { previewUrl } = await res.json()
+      setTemplates(prev => prev.map(t =>
+        t.id === pendingUpload.id ? { ...t, previewUrl } : t
+      ))
+    } else {
+      const err = await res.text()
+      alert(`Erreur upload : ${err}`)
+    }
+
+    setUploadingId(null)
+    setPendingUpload(null)
+    e.target.value = ''
   }
 
   if (loading) return (
@@ -174,6 +200,15 @@ export default function AdminTemplatesPage() {
 
   return (
     <div className="space-y-8">
+      {/* Input upload caché — partagé par tous les boutons */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        className="hidden"
+        onChange={handleImageChange}
+      />
+
       <h1 className="text-2xl font-serif">Templates &amp; IA</h1>
 
       {/* Switch IA */}
@@ -219,7 +254,7 @@ export default function AdminTemplatesPage() {
         {/* Formulaire création */}
         {showCreate && (
           <form onSubmit={handleCreate} className="bg-neutral-900 border border-neutral-700 rounded-xl p-5 mb-4 space-y-3">
-            <h3 className="text-sm font-semibold mb-3">Créer un template</h3>
+            <h3 className="text-sm font-semibold">Créer un template</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-neutral-400 mb-1">Nom *</label>
@@ -231,7 +266,7 @@ export default function AdminTemplatesPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-neutral-400 mb-1">Clé (unique) *</label>
+                <label className="block text-xs text-neutral-400 mb-1">Clé unique *</label>
                 <input
                   value={createForm.templateKey}
                   onChange={e => setCreateForm(f => ({ ...f, templateKey: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
@@ -239,16 +274,7 @@ export default function AdminTemplatesPage() {
                   className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-600 font-mono focus:outline-none focus:border-neutral-500"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-neutral-400 mb-1">URL preview (optionnel)</label>
-                <input
-                  value={createForm.previewUrl}
-                  onChange={e => setCreateForm(f => ({ ...f, previewUrl: e.target.value }))}
-                  placeholder="https://..."
-                  className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-500"
-                />
-              </div>
-              <div className="flex items-center gap-3 pt-5">
+              <div className="flex items-center gap-3 pt-4">
                 <input
                   type="checkbox"
                   id="create-premium"
@@ -264,7 +290,7 @@ export default function AdminTemplatesPage() {
               <button
                 type="submit"
                 disabled={creating}
-                className="bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-neutral-200 transition disabled:opacity-50"
+                className="bg-white text-black text-sm font-semibold px-4 py-2 rounded-lg hover:bg-neutral-200 transition disabled:opacity-50 flex items-center gap-2"
               >
                 {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Créer'}
               </button>
@@ -284,6 +310,7 @@ export default function AdminTemplatesPage() {
           <table className="w-full text-sm min-w-160">
             <thead>
               <tr className="border-b border-neutral-800 text-neutral-400 text-xs">
+                <th className="text-left px-4 py-3 font-medium w-16">Aperçu</th>
                 <th className="text-left px-4 py-3 font-medium">Nom</th>
                 <th className="text-left px-4 py-3 font-medium">Clé</th>
                 <th className="text-center px-3 py-3 font-medium">Actif</th>
@@ -294,8 +321,30 @@ export default function AdminTemplatesPage() {
             <tbody>
               {templates.map(t => (
                 <tr key={t.id} className="border-b border-neutral-800/50 hover:bg-neutral-800/20 transition">
+                  {/* Aperçu */}
+                  <td className="px-4 py-2">
+                    <div className="relative w-10 h-14 bg-neutral-800 rounded overflow-hidden flex items-center justify-center group">
+                      {t.previewUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={t.previewUrl} alt={t.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-neutral-600 text-xs">—</span>
+                      )}
+                      <button
+                        onClick={() => triggerUpload(t)}
+                        disabled={uploadingId === t.id}
+                        title="Changer l'image"
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition"
+                      >
+                        {uploadingId === t.id
+                          ? <Loader2 className="w-4 h-4 text-white animate-spin" />
+                          : <ImageUp className="w-4 h-4 text-white" />
+                        }
+                      </button>
+                    </div>
+                  </td>
+
                   {editId === t.id ? (
-                    /* Mode édition inline */
                     <>
                       <td className="px-4 py-2">
                         <input
@@ -318,13 +367,13 @@ export default function AdminTemplatesPage() {
                           <button
                             onClick={() => saveEdit(t.id)}
                             disabled={editSaving}
-                            className="text-green-400 hover:text-green-300 transition px-2 py-1 rounded hover:bg-green-500/10"
+                            className="text-green-400 hover:text-green-300 transition p-1.5 rounded hover:bg-green-500/10"
                           >
                             {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                           </button>
                           <button
                             onClick={() => setEditId(null)}
-                            className="text-neutral-400 hover:text-white transition px-2 py-1 rounded hover:bg-neutral-700"
+                            className="text-neutral-400 hover:text-white transition p-1.5 rounded hover:bg-neutral-700"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -332,7 +381,6 @@ export default function AdminTemplatesPage() {
                       </td>
                     </>
                   ) : (
-                    /* Mode lecture */
                     <>
                       <td className="px-4 py-3 font-medium">{t.name}</td>
                       <td className="px-4 py-3 text-neutral-400 font-mono text-xs">{t.templateKey}</td>
@@ -342,7 +390,9 @@ export default function AdminTemplatesPage() {
                           disabled={saving === t.id + 'isActive'}
                           title={t.isActive ? 'Désactiver' : 'Activer'}
                           className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto transition ${
-                            t.isActive ? 'bg-green-500/20 text-green-400 hover:bg-red-500/20 hover:text-red-400' : 'bg-neutral-800 text-neutral-500 hover:bg-green-500/20 hover:text-green-400'
+                            t.isActive
+                              ? 'bg-green-500/20 text-green-400 hover:bg-red-500/20 hover:text-red-400'
+                              : 'bg-neutral-800 text-neutral-500 hover:bg-green-500/20 hover:text-green-400'
                           }`}
                         >
                           {saving === t.id + 'isActive'
@@ -356,7 +406,9 @@ export default function AdminTemplatesPage() {
                           disabled={saving === t.id + 'isPremium'}
                           title={t.isPremium ? 'Passer gratuit' : 'Passer premium'}
                           className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto transition ${
-                            t.isPremium ? 'bg-amber-500/20 text-amber-400 hover:bg-neutral-800 hover:text-neutral-400' : 'bg-neutral-800 text-neutral-500 hover:bg-amber-500/20 hover:text-amber-400'
+                            t.isPremium
+                              ? 'bg-amber-500/20 text-amber-400 hover:bg-neutral-800 hover:text-neutral-400'
+                              : 'bg-neutral-800 text-neutral-500 hover:bg-amber-500/20 hover:text-amber-400'
                           }`}
                         >
                           {saving === t.id + 'isPremium'
@@ -366,6 +418,16 @@ export default function AdminTemplatesPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => triggerUpload(t)}
+                            disabled={uploadingId === t.id}
+                            title="Uploader une image d'aperçu"
+                            className="text-neutral-400 hover:text-blue-400 transition p-1.5 rounded hover:bg-blue-500/10"
+                          >
+                            {uploadingId === t.id
+                              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              : <ImageUp className="w-3.5 h-3.5" />}
+                          </button>
                           <button
                             onClick={() => startEdit(t)}
                             title="Modifier"
@@ -391,8 +453,8 @@ export default function AdminTemplatesPage() {
               ))}
               {templates.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="text-center text-neutral-500 py-10 text-sm">
-                    Aucun template. Créez-en un avec le bouton ci-dessus.
+                  <td colSpan={6} className="text-center text-neutral-500 py-10 text-sm">
+                    Aucun template.
                   </td>
                 </tr>
               )}
