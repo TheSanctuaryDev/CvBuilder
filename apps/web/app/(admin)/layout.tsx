@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart2, FileText, CreditCard, Layers, Settings } from 'lucide-react'
+import { BarChart2, FileText, CreditCard, Layers } from 'lucide-react'
 
 const nav = [
   { href: '/admin', label: 'Stats', icon: BarChart2 },

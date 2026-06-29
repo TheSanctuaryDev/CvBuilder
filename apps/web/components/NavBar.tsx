@@ -4,13 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Settings, Menu, X as XIcon } from 'lucide-react'
+import { Settings, Menu, X as XIcon, ShieldCheck } from 'lucide-react'
 
 interface NavBarProps {
   userEmail?: string
+  isAdmin?: boolean
 }
 
-export default function NavBar({ userEmail }: NavBarProps) {
+export default function NavBar({ userEmail, isAdmin }: NavBarProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
@@ -36,6 +37,11 @@ export default function NavBar({ userEmail }: NavBarProps) {
           <Link href="/cv/nouveau" className="bg-white text-black text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-neutral-200 transition">
             + Nouveau CV
           </Link>
+          {isAdmin && (
+            <Link href="/admin" className="text-neutral-400 hover:text-white transition" title="Admin">
+              <ShieldCheck className="w-4 h-4" />
+            </Link>
+          )}
           <Link href="/settings" className="text-neutral-400 hover:text-white transition" title={userEmail ?? 'Paramètres'}>
             <Settings className="w-4 h-4" />
           </Link>
@@ -66,6 +72,11 @@ export default function NavBar({ userEmail }: NavBarProps) {
           <Link href="/cv/nouveau" onClick={() => setOpen(false)} className="text-center bg-white text-black text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-neutral-200 transition">
             + Nouveau CV
           </Link>
+          {isAdmin && (
+            <Link href="/admin" onClick={() => setOpen(false)} className="text-neutral-300 hover:text-white text-sm px-3 py-2.5 rounded-lg hover:bg-neutral-800 transition">
+              Admin
+            </Link>
+          )}
           <Link href="/settings" onClick={() => setOpen(false)} className="text-neutral-300 hover:text-white text-sm px-3 py-2.5 rounded-lg hover:bg-neutral-800 transition">
             Paramètres
           </Link>
