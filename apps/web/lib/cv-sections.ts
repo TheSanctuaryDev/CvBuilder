@@ -143,8 +143,14 @@ export function sectionsToCvData(sections: CvSection[]): Partial<CvData> & { ful
  */
 export function rawDataToSections(data: Record<string, unknown> | null | undefined): CvSection[] {
   if (!data) return []
+  let sections: CvSection[]
   if (Array.isArray((data as Record<string, unknown>).sections)) {
-    return (data as { sections: CvSection[] }).sections
+    sections = (data as { sections: CvSection[] }).sections
+  } else {
+    sections = cvDataToSections(data as unknown as CvData)
   }
-  return cvDataToSections(data as unknown as CvData)
+  // BUG-04 : normaliser les orders pour garantir des valeurs uniques et contiguës
+  return [...sections]
+    .sort((a, b) => a.order - b.order)
+    .map((s, i) => ({ ...s, order: i }))
 }

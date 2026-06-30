@@ -65,12 +65,18 @@ export default function RichTextEditor({ content, onChange, placeholder, minHeig
     },
   })
 
-  // Mise à jour depuis l'extérieur (ex : amélioration IA)
+  // BUG-07 : destroy Tiptap pour éviter la fuite mémoire au démontage
+  useEffect(() => {
+    return () => { editor?.destroy() }
+  }, [editor])
+
+  // Mise à jour depuis l'extérieur (ex : amélioration IA) — BUG-08 : normalise '<p></p>' → ''
   useEffect(() => {
     if (!editor || editor.isFocused) return
-    const currentHtml = editor.getHTML()
-    const normalizedContent = content || ''
-    if (currentHtml === normalizedContent) return
+    const currentHtml  = editor.getHTML()
+    const normalizedCurrent  = currentHtml === '<p></p>' ? '' : currentHtml
+    const normalizedContent  = content || ''
+    if (normalizedCurrent === normalizedContent) return
     editor.commands.setContent(normalizedContent, { emitUpdate: false })
   }, [content, editor])
 

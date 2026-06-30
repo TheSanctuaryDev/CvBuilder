@@ -43,6 +43,11 @@ async function renderSectionToMarkup(section: CvSection): Promise<string> {
       const { default: V } = await import('@/components/cv-sections/ReferencesSectionView')
       return renderToStaticMarkup(React.createElement(V, { section }))
     }
+    // BUG-15 : sections custom absentes du PDF
+    case 'custom': {
+      const { default: V } = await import('@/components/cv-sections/CustomSectionView')
+      return renderToStaticMarkup(React.createElement(V, { section }))
+    }
     default: return ''
   }
 }
@@ -72,7 +77,8 @@ export async function POST(req: NextRequest) {
     }
 
     const tokens = parseTokens(styleTokens ? JSON.stringify(styleTokens) : null)
-    const sorted = [...sections].sort((a, b) => a.order - b.order)
+    // BUG-05 : exclure les sections masquées du PDF
+    const sorted = [...sections].filter(s => !s.hidden).sort((a, b) => a.order - b.order)
     const sectionsHtml = (await Promise.all(sorted.map(renderSectionToMarkup))).join('\n')
 
     const html = `<!DOCTYPE html>

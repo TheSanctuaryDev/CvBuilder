@@ -44,7 +44,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       }
 
     case 'ADD_SECTION': {
-      const maxOrder = Math.max(...state.sections.map(s => s.order), -1)
+      // BUG-11 : Math.max(...largArray) → RangeError ; reduce() est safe
+      const maxOrder = state.sections.reduce((m, s) => Math.max(m, s.order), -1)
       return {
         ...withHistory(state, [...state.sections, { ...action.section, order: maxOrder + 1 }]),
         activeSectionId: action.section.id,
@@ -85,11 +86,20 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return withHistory(state, sections)
     }
 
-    case 'REORDER':
-      return withHistory(
-        state,
-        action.ids.map((id, i) => ({ ...state.sections.find(s => s.id === id)!, order: i })),
-      )
+    case 'REORDER': {
+      // BUG-03 : find()! → crash silencieux si id inconnu
+      // BUG-02 : les sections masquées (non dans action.ids) conservent une position cohérente
+      const orderedMap = new Map(action.ids.map((id, i) => [id, i]))
+      const maxOrdered = action.ids.length
+      const reordered = [...state.sections]
+        .sort((a, b) => {
+          const aPos = orderedMap.has(a.id) ? orderedMap.get(a.id)! : maxOrdered + a.order
+          const bPos = orderedMap.has(b.id) ? orderedMap.get(b.id)! : maxOrdered + b.order
+          return aPos - bPos
+        })
+        .map((s, i) => ({ ...s, order: i }))
+      return withHistory(state, reordered)
+    }
 
     case 'UNDO':
       if (state.past.length === 0) return state

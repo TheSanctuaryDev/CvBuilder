@@ -46,17 +46,21 @@ export default function CVPreview({
   // Les sections masquées ne s'affichent pas dans le rendu A4
   const visible = sorted.filter(s => !s.hidden)
 
+  // BUG-02 : le DnD opère sur `visible` uniquement — les sections masquées
+  // n'ont pas de noeud DOM et ne doivent pas être incluses dans le SortableContext.
+  // Le reducer REORDER place les sections non-présentes dans action.ids à la fin.
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
-    const oldIndex = sorted.findIndex(s => s.id === active.id)
-    const newIndex = sorted.findIndex(s => s.id === over.id)
+    const oldIndex = visible.findIndex(s => s.id === active.id)
+    const newIndex = visible.findIndex(s => s.id === over.id)
     if (oldIndex === -1 || newIndex === -1) return
 
-    const reordered = [...sorted]
+    const reordered = [...visible]
     const [moved] = reordered.splice(oldIndex, 1)
     reordered.splice(newIndex, 0, moved)
+    // Passe uniquement les IDs visibles ; les masqués sont gérés par le reducer
     dispatch({ type: 'REORDER', ids: reordered.map(s => s.id) })
   }
 
@@ -73,7 +77,7 @@ export default function CVPreview({
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={sorted.map(s => s.id)}
+          items={visible.map(s => s.id)}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-1">

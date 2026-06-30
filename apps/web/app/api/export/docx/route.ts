@@ -4,12 +4,18 @@ import {
   Document, Packer, Paragraph, TextRun, HeadingLevel,
   BorderStyle,
 } from 'docx'
-import type { CvSection, ExperienceSection, FormationSection } from '@/types/editor'
+import type { CvSection, ExperienceSection, FormationSection, CustomSection } from '@/types/editor'
 import { parseTokens, tokensToDocxTheme, type StyleTokens } from '@/components/templates/registry'
+
+/** Retire les balises HTML (Tiptap rich text) pour l'export DOCX plain-text */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim()
+}
 
 function buildDocxChildren(sections: CvSection[], secondaryColor: string): Paragraph[] {
   const paras: Paragraph[] = []
-  const sorted = [...sections].sort((a, b) => a.order - b.order)
+  // BUG-06 : exclure les sections masquées + trier par order
+  const sorted = [...sections].filter(s => !s.hidden).sort((a, b) => a.order - b.order)
 
   for (const section of sorted) {
     switch (section.type) {
@@ -40,7 +46,8 @@ function buildDocxChildren(sections: CvSection[], secondaryColor: string): Parag
       case 'summary':
         paras.push(
           new Paragraph({ text: 'PROFIL', heading: HeadingLevel.HEADING_2 }),
-          new Paragraph({ text: section.text }),
+          // BUG-06 : le texte peut être du HTML (Tiptap) → on le strip
+          new Paragraph({ text: stripHtml(section.text) }),
           new Paragraph({ text: '' })
         )
         break
@@ -58,7 +65,7 @@ function buildDocxChildren(sections: CvSection[], secondaryColor: string): Parag
             new Paragraph({
               children: [new TextRun({ text: [entry.startDate, entry.endDate].filter(Boolean).join(' – '), size: 18, color: '888888' })],
             }),
-            new Paragraph({ text: entry.description }),
+            new Paragraph({ text: stripHtml(entry.description ?? '') }),
             new Paragraph({ text: '' })
           )
         }
@@ -113,6 +120,19 @@ function buildDocxChildren(sections: CvSection[], secondaryColor: string): Parag
           new Paragraph({ text: '' })
         )
         break
+
+      // BUG-06 : sections custom absentes du DOCX
+      case 'custom': {
+        const c = section as CustomSection
+        if (c.title?.trim()) {
+          paras.push(new Paragraph({ text: c.title.toUpperCase(), heading: HeadingLevel.HEADING_2 }))
+        }
+        paras.push(
+          new Paragraph({ text: stripHtml(c.content ?? '') }),
+          new Paragraph({ text: '' })
+        )
+        break
+      }
     }
   }
 
