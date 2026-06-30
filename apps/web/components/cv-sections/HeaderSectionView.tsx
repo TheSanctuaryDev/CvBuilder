@@ -1,10 +1,34 @@
 // apps/web/components/cv-sections/HeaderSectionView.tsx
 import type { HeaderSection } from '@/types/editor'
 
+const PHOTO_RADIUS: Record<string, string> = {
+  circle:  '50%',
+  rounded: '12px',
+  square:  '0px',
+}
+
 export default function HeaderSectionView({ section }: { section: HeaderSection }) {
+  const photoSize     = section.photoSize     ?? 80
+  const photoPosition = section.photoPosition ?? 'right'
+  const photoRadius   = PHOTO_RADIUS[section.photoShape ?? 'circle']
+
+  const photo = section.photoBase64 && (
+    <img
+      src={section.photoBase64}
+      alt={section.fullName}
+      className="shrink-0 object-cover"
+      style={{
+        width:        photoSize,
+        height:       photoSize,
+        borderRadius: photoRadius,
+        border:       '2px solid var(--cv-divider-color, #d1d5db)',
+      }}
+    />
+  )
+
   return (
     <div className="mb-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className={`flex items-start gap-4 ${photoPosition === 'left' ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Infos principales */}
         <div className="flex-1 min-w-0">
           <h1
@@ -26,32 +50,19 @@ export default function HeaderSectionView({ section }: { section: HeaderSection 
             {section.phones?.filter(p => p.number).map((p, i) => (
               <span key={i}>{p.indicatif} {p.number}</span>
             ))}
-            {section.address && <span>{section.address}</span>}
+            {section.address  && <span>{section.address}</span>}
             {section.linkedIn && <span>{section.linkedIn}</span>}
-            {section.gitHub && <span>{section.gitHub}</span>}
+            {section.gitHub   && <span>{section.gitHub}</span>}
           </div>
         </div>
 
-        {/* Photo de profil */}
-        {section.photoBase64 && (
-          <img
-            src={section.photoBase64}
-            alt={section.fullName}
-            className="shrink-0 object-cover"
-            style={{
-              width: 80,
-              height: 80,
-              borderRadius: 'var(--cv-photo-radius, 50%)',
-              border: '2px solid var(--cv-divider-color, #d1d5db)',
-            }}
-          />
-        )}
+        {photo}
       </div>
 
       <hr
         className="mt-3"
         style={{
-          border: 'none',
+          border:    'none',
           borderTop: 'var(--cv-divider-width, 1px) solid var(--cv-divider-color, #d1d5db)',
         }}
       />

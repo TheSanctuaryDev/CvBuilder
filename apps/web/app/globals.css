@@ -17,3 +17,23 @@ body {
   color: var(--foreground);
 }
 
+/* ── Tiptap editor ────────────────────────────────────────────────────── */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #525252;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap:focus { outline: none; }
+.tiptap p { margin: 0; }
+.tiptap p + p { margin-top: 0.2em; }
+
+/* ── Rendu rich-text dans le CV ───────────────────────────────────────── */
+.cv-rich-text strong  { font-weight: 700; }
+.cv-rich-text em      { font-style: italic; }
+.cv-rich-text u       { text-decoration: underline; }
+.cv-rich-text p       { margin: 0; line-height: inherit; }
+.cv-rich-text p + p   { margin-top: 0.25em; }
+

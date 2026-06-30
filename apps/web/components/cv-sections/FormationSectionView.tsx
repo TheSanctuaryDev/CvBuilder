@@ -1,5 +1,6 @@
 // apps/web/components/cv-sections/FormationSectionView.tsx
 import type { FormationSection } from '@/types/editor'
+import { sanitizeRichText } from '@/lib/sanitize'
 
 export default function FormationSectionView({ section }: { section: FormationSection }) {
   return (
@@ -11,24 +12,36 @@ export default function FormationSectionView({ section }: { section: FormationSe
         Formation
       </h2>
       <div className="space-y-3">
-        {section.entries.map(entry => (
-          <div key={entry.id}>
-            <div className="flex justify-between items-baseline">
-              <span className="text-sm font-semibold text-black">
-                {entry.degree || <span className="text-neutral-400 italic">Diplôme</span>}
-                {entry.school && (
-                  <span className="font-normal" style={{ color: 'var(--cv-accent-color, #4b5563)' }}> · {entry.school}</span>
+        {section.entries.map(entry => {
+          const descIsHtml = entry.description?.trimStart().startsWith('<')
+          return (
+            <div key={entry.id}>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm font-semibold text-black">
+                  {entry.degree || <span className="text-neutral-400 italic">Diplôme</span>}
+                  {entry.school && (
+                    <span className="font-normal" style={{ color: 'var(--cv-accent-color, #4b5563)' }}>
+                      {' '}· {entry.school}
+                    </span>
+                  )}
+                </span>
+                {entry.year && (
+                  <span className="text-xs text-neutral-400 ml-2 shrink-0">{entry.year}</span>
                 )}
-              </span>
-              {entry.year && (
-                <span className="text-xs text-neutral-400 ml-2 shrink-0">{entry.year}</span>
+              </div>
+              {entry.description && (
+                descIsHtml ? (
+                  <div
+                    className="cv-rich-text text-xs text-neutral-600 mt-1"
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(entry.description) }}
+                  />
+                ) : (
+                  <p className="text-xs text-neutral-600 mt-1">{entry.description}</p>
+                )
               )}
             </div>
-            {entry.description && (
-              <p className="text-xs text-neutral-600 mt-1">{entry.description}</p>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

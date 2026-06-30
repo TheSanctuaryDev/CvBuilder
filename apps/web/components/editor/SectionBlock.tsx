@@ -5,14 +5,15 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import type { CvSection } from '@/types/editor'
-import HeaderSectionView from '@/components/cv-sections/HeaderSectionView'
-import SummarySectionView from '@/components/cv-sections/SummarySectionView'
+import HeaderSectionView    from '@/components/cv-sections/HeaderSectionView'
+import SummarySectionView   from '@/components/cv-sections/SummarySectionView'
 import ExperienceSectionView from '@/components/cv-sections/ExperienceSectionView'
-import FormationSectionView from '@/components/cv-sections/FormationSectionView'
-import SkillsSectionView from '@/components/cv-sections/SkillsSectionView'
-import LanguagesSectionView from '@/components/cv-sections/LanguagesSectionView'
-import InterestsSectionView from '@/components/cv-sections/InterestsSectionView'
+import FormationSectionView  from '@/components/cv-sections/FormationSectionView'
+import SkillsSectionView     from '@/components/cv-sections/SkillsSectionView'
+import LanguagesSectionView  from '@/components/cv-sections/LanguagesSectionView'
+import InterestsSectionView  from '@/components/cv-sections/InterestsSectionView'
 import ReferencesSectionView from '@/components/cv-sections/ReferencesSectionView'
+import CustomSectionView     from '@/components/cv-sections/CustomSectionView'
 
 interface SectionBlockProps {
   section: CvSection
@@ -23,15 +24,16 @@ interface SectionBlockProps {
 
 function renderSection(section: CvSection) {
   switch (section.type) {
-    case 'header': return <HeaderSectionView section={section} />
-    case 'summary': return <SummarySectionView section={section} />
+    case 'header':     return <HeaderSectionView    section={section} />
+    case 'summary':    return <SummarySectionView   section={section} />
     case 'experience': return <ExperienceSectionView section={section} />
-    case 'formation': return <FormationSectionView section={section} />
-    case 'skills': return <SkillsSectionView section={section} />
-    case 'languages': return <LanguagesSectionView section={section} />
-    case 'interests': return <InterestsSectionView section={section} />
+    case 'formation':  return <FormationSectionView  section={section} />
+    case 'skills':     return <SkillsSectionView     section={section} />
+    case 'languages':  return <LanguagesSectionView  section={section} />
+    case 'interests':  return <InterestsSectionView  section={section} />
     case 'references': return <ReferencesSectionView section={section} />
-    default: return null
+    case 'custom':     return <CustomSectionView     section={section} />
+    default:           return null
   }
 }
 
@@ -58,7 +60,6 @@ export default function SectionBlock({ section, isActive, onClick, isDragDisable
           : 'hover:ring-1 hover:ring-neutral-300 hover:ring-offset-1'
       }`}
     >
-      {/* Drag handle — visible au hover, caché sur mobile */}
       {!isDragDisabled && (
         <div
           {...attributes}

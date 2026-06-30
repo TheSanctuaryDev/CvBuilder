@@ -1,5 +1,6 @@
 // apps/web/components/cv-sections/ExperienceSectionView.tsx
 import type { ExperienceSection } from '@/types/editor'
+import { sanitizeRichText } from '@/lib/sanitize'
 
 export default function ExperienceSectionView({ section }: { section: ExperienceSection }) {
   return (
@@ -11,31 +12,41 @@ export default function ExperienceSectionView({ section }: { section: Experience
         Expériences professionnelles
       </h2>
       <div className="space-y-4">
-        {section.entries.map(entry => (
-          <div key={entry.id}>
-            <div className="flex justify-between items-baseline">
-              <span className="text-sm font-semibold text-black">
-                {entry.title || <span className="text-neutral-400 italic">Poste</span>}
-                {entry.company && (
-                  <span className="font-normal" style={{ color: 'var(--cv-accent-color, #4b5563)' }}>
-                    {' '}· {entry.company}
-                  </span>
-                )}
-                {entry.location && (
-                  <span className="font-normal text-xs" style={{ color: 'var(--cv-accent-color, #9ca3af)' }}>
-                    {' '}· {entry.location}
-                  </span>
-                )}
-              </span>
-              <span className="text-xs text-neutral-400 ml-2 shrink-0">
-                {[entry.startDate, entry.endDate].filter(Boolean).join(' – ')}
-              </span>
+        {section.entries.map(entry => {
+          const descIsHtml = entry.description?.trimStart().startsWith('<')
+          return (
+            <div key={entry.id}>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm font-semibold text-black">
+                  {entry.title || <span className="text-neutral-400 italic">Poste</span>}
+                  {entry.company && (
+                    <span className="font-normal" style={{ color: 'var(--cv-accent-color, #4b5563)' }}>
+                      {' '}· {entry.company}
+                    </span>
+                  )}
+                  {entry.location && (
+                    <span className="font-normal text-xs" style={{ color: 'var(--cv-accent-color, #9ca3af)' }}>
+                      {' '}· {entry.location}
+                    </span>
+                  )}
+                </span>
+                <span className="text-xs text-neutral-400 ml-2 shrink-0">
+                  {[entry.startDate, entry.currentPosition ? 'Présent' : entry.endDate].filter(Boolean).join(' – ')}
+                </span>
+              </div>
+              {entry.description && (
+                descIsHtml ? (
+                  <div
+                    className="cv-rich-text text-xs text-neutral-600 mt-1 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(entry.description) }}
+                  />
+                ) : (
+                  <p className="text-xs text-neutral-600 mt-1 leading-relaxed">{entry.description}</p>
+                )
+              )}
             </div>
-            {entry.description && (
-              <p className="text-xs text-neutral-600 mt-1 leading-relaxed">{entry.description}</p>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

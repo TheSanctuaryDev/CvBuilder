@@ -9,6 +9,7 @@ export type SectionType =
   | 'languages'
   | 'interests'
   | 'references'
+  | 'custom'
 
 export type HeaderSection = {
   id: string
@@ -23,6 +24,9 @@ export type HeaderSection = {
   linkedIn?: string
   gitHub?: string
   photoBase64?: string
+  photoSize?: number
+  photoPosition?: 'left' | 'right'
+  photoShape?: 'circle' | 'square' | 'rounded'
 }
 
 export type ExperienceEntry = {
@@ -33,7 +37,7 @@ export type ExperienceEntry = {
   startDate: string
   endDate: string
   currentPosition?: boolean
-  description: string
+  description: string  // peut contenir du HTML (gras, italique, souligné)
 }
 
 export type FormationEntry = {
@@ -42,7 +46,7 @@ export type FormationEntry = {
   school: string
   year: string
   location?: string
-  description?: string
+  description?: string  // peut contenir du HTML
 }
 
 export type SummarySection = {
@@ -50,7 +54,18 @@ export type SummarySection = {
   type: 'summary'
   order: number
   hidden?: boolean
-  text: string
+  text: string  // peut contenir du HTML
+  textAlign?: 'left' | 'center' | 'right'
+}
+
+export type CustomSection = {
+  id: string
+  type: 'custom'
+  order: number
+  hidden?: boolean
+  title: string
+  content: string  // HTML riche
+  textAlign?: 'left' | 'center' | 'right'
 }
 
 export type ExperienceSection = {
@@ -110,6 +125,7 @@ export type CvSection =
   | LanguagesSection
   | InterestsSection
   | ReferencesSection
+  | CustomSection
 
 export type EditorState = {
   cvId: string
