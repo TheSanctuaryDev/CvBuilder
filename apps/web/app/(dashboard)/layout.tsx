@@ -18,8 +18,9 @@ async function checkIsAdmin(token: string): Promise<boolean> {
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
-
-  const isAdmin = session ? await checkIsAdmin(session.access_token) : false
+  // getUser() valide le JWT côté Supabase (cohérent avec BUG-25)
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = session && user ? await checkIsAdmin(session.access_token) : false
 
   return (
     <div className="min-h-screen">
