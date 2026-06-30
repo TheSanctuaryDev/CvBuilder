@@ -11,6 +11,23 @@ export type SectionType =
   | 'references'
   | 'custom'
 
+export type ContactIconStyle = {
+  show: boolean
+  position: 'before' | 'after' | 'bullet'
+  color?: string    // ex: '#6b7280'
+  size?: number     // em, default 1
+}
+
+export type CustomTitleStyle = {
+  fontSize?: number           // px
+  color?: string
+  fontWeight?: 'normal' | 'semibold' | 'bold'
+  fontStyle?: 'normal' | 'italic'
+  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize'
+  textAlign?: 'left' | 'center' | 'right'
+  letterSpacing?: 'tight' | 'normal' | 'wide' | 'widest'
+}
+
 export type HeaderSection = {
   id: string
   type: 'header'
@@ -27,6 +44,7 @@ export type HeaderSection = {
   photoSize?: number
   photoPosition?: 'left' | 'right'
   photoShape?: 'circle' | 'square' | 'rounded'
+  contactIconStyle?: ContactIconStyle
 }
 
 export type ExperienceEntry = {
@@ -66,6 +84,7 @@ export type CustomSection = {
   title: string
   content: string  // HTML riche
   textAlign?: 'left' | 'center' | 'right'
+  titleStyle?: CustomTitleStyle
 }
 
 export type ExperienceSection = {

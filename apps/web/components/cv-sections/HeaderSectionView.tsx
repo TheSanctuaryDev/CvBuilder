@@ -1,10 +1,44 @@
 // apps/web/components/cv-sections/HeaderSectionView.tsx
 import type { HeaderSection } from '@/types/editor'
+import { Mail, Phone, MapPin, Link2, GitBranch } from 'lucide-react'
 
 const PHOTO_RADIUS: Record<string, string> = {
   circle:  '50%',
   rounded: '12px',
   square:  '0px',
+}
+
+function ContactItem({
+  icon: Icon,
+  text,
+  iconStyle,
+}: {
+  icon: React.FC<{ style?: React.CSSProperties; className?: string }>
+  text: string
+  iconStyle?: import('@/types/editor').ContactIconStyle
+}) {
+  if (!text) return null
+  const show = iconStyle?.show ?? false
+  const pos  = iconStyle?.position ?? 'before'
+  const color = iconStyle?.color ?? 'currentColor'
+  const size  = iconStyle?.size ?? 1
+
+  const iconEl = show ? (
+    <Icon style={{ color, width: `${size}em`, height: `${size}em`, flexShrink: 0 }} />
+  ) : null
+
+  if (!show || pos === 'bullet') {
+    return (
+      <span className="flex items-center gap-1">
+        {iconEl && <span className="flex items-center">{iconEl}</span>}
+        {text}
+      </span>
+    )
+  }
+  if (pos === 'after') {
+    return <span className="flex items-center gap-1">{text}{iconEl}</span>
+  }
+  return <span className="flex items-center gap-1">{iconEl}{text}</span>
 }
 
 export default function HeaderSectionView({ section }: { section: HeaderSection }) {
@@ -46,13 +80,15 @@ export default function HeaderSectionView({ section }: { section: HeaderSection 
             className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs"
             style={{ color: 'var(--cv-accent-color, #6b7280)' }}
           >
-            {section.emails?.filter(Boolean).map((e, i) => <span key={i}>{e}</span>)}
-            {section.phones?.filter(p => p.number).map((p, i) => (
-              <span key={i}>{p.indicatif} {p.number}</span>
+            {section.emails?.filter(Boolean).map((e, i) => (
+              <ContactItem key={i} icon={Mail} text={e} iconStyle={section.contactIconStyle} />
             ))}
-            {section.address  && <span>{section.address}</span>}
-            {section.linkedIn && <span>{section.linkedIn}</span>}
-            {section.gitHub   && <span>{section.gitHub}</span>}
+            {section.phones?.filter(p => p.number).map((p, i) => (
+              <ContactItem key={i} icon={Phone} text={`${p.indicatif} ${p.number}`} iconStyle={section.contactIconStyle} />
+            ))}
+            {section.address  && <ContactItem icon={MapPin}    text={section.address}  iconStyle={section.contactIconStyle} />}
+            {section.linkedIn && <ContactItem icon={Link2}    text={section.linkedIn} iconStyle={section.contactIconStyle} />}
+            {section.gitHub   && <ContactItem icon={GitBranch} text={section.gitHub}  iconStyle={section.contactIconStyle} />}
           </div>
         </div>
 

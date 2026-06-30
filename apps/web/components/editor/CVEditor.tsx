@@ -95,7 +95,9 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
   const [mobileTab, setMobileTab] = useState<'preview' | 'edit'>('preview')
   // Échelle adaptative pour l'aperçu mobile/tablette
   const [cvScale, setCvScale] = useState(0.65)
+  const [cvContentHeight, setCvContentHeight] = useState(1122) // A4 par défaut
   const previewContainerRef = useRef<HTMLDivElement>(null)
+  const cvInnerRef = useRef<HTMLDivElement>(null)
   const [currentTemplateKey, setCurrentTemplateKey] = useState(initialTemplateKey)
   const [currentStyleTokens, setCurrentStyleTokens] = useState<StyleTokens>(initialTokens)
   const [templates, setTemplates] = useState<TemplateOption[]>([])
@@ -190,17 +192,31 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
   }, [state.isDirty, currentStyleTokens, cvId]) // currentStyleTokens déclenche le save sur changement de style
 
   // Echelle adaptive pour l'aperçu : s'adapte à la largeur réelle du conteneur
+  // Dépend de `loading` car le conteneur n'est rendu qu'après le chargement
   useEffect(() => {
+    if (loading) return
     function update() {
       if (!previewContainerRef.current) return
-      const w = previewContainerRef.current.offsetWidth - 32 // 32 = padding
+      const w = previewContainerRef.current.offsetWidth - 32 // 32 = padding h
       setCvScale(Math.min(0.9, Math.max(0.3, w / 794)))
     }
     const obs = new ResizeObserver(update)
     if (previewContainerRef.current) obs.observe(previewContainerRef.current)
     update()
     return () => obs.disconnect()
-  }, [])
+  }, [loading])
+
+  // ResizeObserver sur le contenu interne du CV mobile pour mesurer sa hauteur réelle
+  // Dépend de `loading` pour la même raison
+  useEffect(() => {
+    if (loading || mobileTab !== 'preview' || !cvInnerRef.current) return
+    const obs = new ResizeObserver(entries => {
+      const h = entries[0]?.contentRect.height
+      if (h) setCvContentHeight(h)
+    })
+    obs.observe(cvInnerRef.current)
+    return () => obs.disconnect()
+  }, [loading, mobileTab])
 
   // BUG-17 : guard — ne pas sauvegarder si rien n'est dirty
   const forceSave = useCallback(async () => {
@@ -438,20 +454,22 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
         {mobileTab === 'preview' ? (
           <div
             ref={previewContainerRef}
-            className="flex-1 overflow-auto bg-neutral-200 p-4 flex justify-center items-start"
+            className="flex-1 overflow-y-auto overflow-x-hidden bg-neutral-200 p-4"
           >
-            {/* Scale adaptatif calculé via ResizeObserver — s'ajuste à la largeur réelle */}
-            <div style={{ transform: `scale(${cvScale})`, transformOrigin: 'top center', width: 794 }}>
-              <CVPreview
-                sections={state.sections}
-                activeSectionId={state.activeSectionId}
-                templateKey={currentTemplateKey}
-                styleTokens={currentStyleTokens}
-                dispatch={action => {
-                  dispatch(action)
-                  if (action.type === 'SET_ACTIVE') setMobileTab('edit')
-                }}
-              />
+            {/* margin auto centre le wrapper ; overflow-x-hidden empêche le scroll horizontal si cvScale n'est pas encore calculé */}
+            <div style={{ width: 794 * cvScale, height: cvContentHeight * cvScale, margin: '0 auto' }}>
+              <div ref={cvInnerRef} style={{ transform: `scale(${cvScale})`, transformOrigin: 'top left', width: 794 }}>
+                <CVPreview
+                  sections={state.sections}
+                  activeSectionId={state.activeSectionId}
+                  templateKey={currentTemplateKey}
+                  styleTokens={currentStyleTokens}
+                  dispatch={action => {
+                    dispatch(action)
+                    if (action.type === 'SET_ACTIVE') setMobileTab('edit')
+                  }}
+                />
+              </div>
             </div>
           </div>
         ) : (

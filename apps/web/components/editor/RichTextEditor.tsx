@@ -15,7 +15,9 @@ import {
   AlignLeft, AlignCenter, AlignRight,
   List, Strikethrough, Minus, Plus,
   ChevronDown, ChevronUp, Type as TypeIcon,
+  Heading1, Heading2, Heading3,
 } from 'lucide-react'
+import HelpTooltip from './HelpTooltip'
 import { LetterSpacing } from './extensions/LetterSpacing'
 import { TextTransform } from './extensions/TextTransform'
 import { DualColumn, DualColumnCell } from './extensions/DualColumn'
@@ -77,9 +79,9 @@ export default function RichTextEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: false, codeBlock: false, blockquote: false, horizontalRule: false }),
+      StarterKit.configure({ heading: { levels: [1, 2, 3] }, codeBlock: false, blockquote: false, horizontalRule: false }),
       Underline,
-      TextAlign.configure({ types: ['paragraph'] }),
+      TextAlign.configure({ types: ['paragraph', 'heading'] }),
       Placeholder.configure({ placeholder: placeholder ?? 'Rédigez ici…' }),
       TextStyleKit,
       Highlight.configure({ multicolor: true }),
@@ -187,6 +189,19 @@ export default function RichTextEditor({
           {/* Ligne 1 : outils principaux */}
           <div className="flex items-center flex-wrap gap-0.5 px-2 py-1.5">
 
+            {/* Titres H1/H2/H3 */}
+            <TBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive('heading', { level: 1 })} title="Titre H1">
+              <Heading1 className="w-3.5 h-3.5" />
+            </TBtn>
+            <TBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} title="Titre H2">
+              <Heading2 className="w-3.5 h-3.5" />
+            </TBtn>
+            <TBtn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} title="Titre H3">
+              <Heading3 className="w-3.5 h-3.5" />
+            </TBtn>
+
+            <div className="w-px h-5 bg-neutral-800 mx-1" />
+
             {/* Format de base */}
             <TBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="Gras (Ctrl+B)">
               <Bold className="w-3.5 h-3.5" />
@@ -287,6 +302,18 @@ export default function RichTextEditor({
                 : <ChevronUp className="w-3 h-3" />
               }
             </button>
+            <HelpTooltip side="left" content={
+              <div className="space-y-1.5">
+                <p className="font-semibold text-white mb-1">Éditeur de texte riche</p>
+                <p><span className="font-medium text-neutral-200">H1 H2 H3</span> — Titres de section (grand / moyen / petit)</p>
+                <p><span className="font-medium text-neutral-200">G I S B</span> — Gras, Italique, Souligné, Barré</p>
+                <p><span className="font-medium text-neutral-200">Alignement</span> — Gauche, Centre, Droite</p>
+                <p><span className="font-medium text-neutral-200">Liste</span> — Cliquez à nouveau pour choisir le style de puce</p>
+                <p><span className="font-medium text-neutral-200">Couleur</span> — Cliquez sur le carré coloré</p>
+                <p><span className="font-medium text-neutral-200">Aa</span> — Options avancées : police, espacement, colonnes…</p>
+                <p className="text-neutral-500 text-[10px] mt-1">Sélectionnez du texte pour afficher la mini-barre flottante</p>
+              </div>
+            } />
           </div>
 
           {/* Ligne 2 : marqueurs de liste — visible uniquement quand une liste est active */}

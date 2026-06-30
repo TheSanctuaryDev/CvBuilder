@@ -1,7 +1,7 @@
 // apps/web/components/editor/SectionPanel.tsx
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, type ReactNode } from 'react'
 import { nanoid } from 'nanoid'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -9,13 +9,15 @@ import {
   GraduationCap, Star, Globe, Heart, Users, FileText,
   Eye, EyeOff, Copy, Sparkles, Loader2, Camera, Trash2,
   Palette, AlignLeft, AlignCenter, AlignRight, LayoutTemplate,
+  Mail, Phone, MapPin, Link2, GitBranch,
 } from 'lucide-react'
 import { HexColorPicker } from 'react-colorful'
 import RichTextEditor from './RichTextEditor'
+import HelpTooltip from './HelpTooltip'
 import type {
   CvSection, EditorAction, ExperienceEntry, ExperienceSection,
   FormationEntry, FormationSection, HeaderSection, SectionType,
-  CustomSection,
+  CustomSection, ContactIconStyle, CustomTitleStyle,
 } from '@/types/editor'
 import type { StyleTokens } from '@/components/templates/registry'
 import type { PhoneEntry } from '@/types'
@@ -113,6 +115,18 @@ const SECTION_LABELS: Record<string, string> = {
   header: 'Informations', summary: 'Profil', experience: 'Expériences',
   formation: 'Formation', skills: 'Compétences', languages: 'Langues',
   interests: 'Intérêts', references: 'Références', custom: 'Section libre',
+}
+
+const SECTION_HELP: Record<string, ReactNode> = {
+  header: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Informations personnelles</p><p>Renseignez votre nom, titre, email, téléphone et réseaux sociaux.</p><p>Vous pouvez ajouter une photo et choisir sa taille, sa position et sa forme.</p><p>Activez les <span className="text-neutral-200 font-medium">icônes de contact</span> en bas pour afficher des pictogrammes à côté de vos coordonnées.</p></div>,
+  summary: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Profil / Accroche</p><p>Décrivez votre profil en 3 à 5 phrases percutantes. C'est la première chose que lit le recruteur.</p><p>Utilisez le bouton <span className="text-neutral-200 font-medium">IA</span> pour reformuler et améliorer votre texte automatiquement.</p></div>,
+  experience: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Expériences professionnelles</p><p>Ajoutez vos postes du plus récent au plus ancien. Pour chaque poste, décrivez vos missions et réalisations.</p><p>Cochez <span className="text-neutral-200 font-medium">En poste actuellement</span> pour que la date de fin s'affiche "Présent".</p></div>,
+  formation: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Formation</p><p>Listez vos diplômes, formations et certifications. Précisez l'établissement et l'année d'obtention.</p></div>,
+  skills: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Compétences</p><p>Tapez une compétence et appuyez sur <span className="text-neutral-200 font-medium">Entrée</span> pour l'ajouter. Supprimez-en une en cliquant sur la croix.</p><p>Visez 6 à 12 compétences clés, pertinentes pour le poste visé.</p></div>,
+  languages: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Langues</p><p>Ajoutez chaque langue avec son niveau (Natif, C1, B2…). Soyez honnête sur votre niveau.</p></div>,
+  interests: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Centres d'intérêt</p><p>Listez vos hobbies et passions. Cette section humanise votre CV et peut créer du lien avec le recruteur.</p></div>,
+  references: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Références</p><p>Mentionnez des personnes pouvant témoigner de votre travail. Indiquez leur nom, poste et contact.</p><p>Vous pouvez aussi simplement écrire "Références disponibles sur demande".</p></div>,
+  custom: <div className="space-y-1.5"><p className="font-semibold text-white mb-1">Section libre</p><p>Créez une section entièrement personnalisée : certifications, publications, projets, prix…</p><p>Cliquez sur <span className="text-neutral-200 font-medium">Style</span> à côté du titre pour changer la police, la casse, la couleur et la taille du titre de section.</p></div>,
 }
 
 function AlignButtons({ value, onChange }: { value?: string; onChange: (v: 'left' | 'center' | 'right') => void }) {
@@ -240,7 +254,10 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
       {/* Header */}
       <div className="px-5 pt-4 pb-0 shrink-0">
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold text-sm">{SECTION_LABELS[section.type] ?? section.type}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm">{SECTION_LABELS[section.type] ?? section.type}</h3>
+            <HelpTooltip content={SECTION_HELP[section.type]} />
+          </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => dispatch({ type: 'TOGGLE_VISIBILITY', id: section!.id })}
@@ -567,6 +584,84 @@ function HeaderForm({ section, dispatch }: { section: HeaderSection; dispatch: R
           </div>
         </Field>
       </div>
+
+      {/* ── Icônes de contact ─────────────────────────────────────── */}
+      <ContactIconPanel iconStyle={section.contactIconStyle} onUpdate={patch => update({ contactIconStyle: patch })} />
+    </div>
+  )
+}
+
+function ContactIconPanel({ iconStyle, onUpdate }: {
+  iconStyle?: ContactIconStyle
+  onUpdate: (s: ContactIconStyle) => void
+}) {
+  const style: ContactIconStyle = iconStyle ?? { show: false, position: 'before', color: '#6b7280', size: 1 }
+  const set = (patch: Partial<ContactIconStyle>) => onUpdate({ ...style, ...patch })
+
+  const CONTACT_ICONS = [
+    { Icon: Mail, label: 'Email' }, { Icon: Phone, label: 'Téléphone' },
+    { Icon: MapPin, label: 'Adresse' }, { Icon: Link2, label: 'LinkedIn' },
+    { Icon: GitBranch, label: 'GitHub' },
+  ]
+
+  return (
+    <div className="pt-4 border-t border-neutral-800 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium text-neutral-300">Icônes de contact</p>
+        <HelpTooltip side="left" content={
+          <div className="space-y-1.5">
+            <p className="font-semibold text-white mb-1">Icônes de contact</p>
+            <p>Affiche une icône à côté de chaque info de contact (email, téléphone, adresse…).</p>
+            <p><span className="font-medium text-neutral-200">Position</span> — avant ou après le texte, ou en guise de puce séparatrice</p>
+            <p><span className="font-medium text-neutral-200">Couleur & taille</span> — personnalisables indépendamment du texte</p>
+            <div className="flex gap-2 mt-1">
+              {CONTACT_ICONS.map(({ Icon, label }) => (
+                <Icon key={label} className="w-3.5 h-3.5 text-neutral-400" aria-label={label} />
+              ))}
+            </div>
+          </div>
+        } />
+      </div>
+
+      {/* Toggle afficher */}
+      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+        <div onClick={() => set({ show: !style.show })} className="relative w-10 h-5 rounded-full cursor-pointer">
+          <div className={`absolute inset-0 rounded-full transition-colors ${style.show ? 'bg-white' : 'bg-neutral-700'}`} />
+          <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform ${style.show ? 'bg-neutral-950 translate-x-5' : 'bg-neutral-300 translate-x-0.5'}`} />
+        </div>
+        <span className="text-xs text-neutral-400">Afficher les icônes</span>
+      </label>
+
+      {style.show && (
+        <div className="space-y-3 pl-1">
+          <Field label="Position">
+            <div className="flex gap-2">
+              {([['before', 'Avant'], ['after', 'Après'], ['bullet', 'Puce']] as const).map(([v, l]) => (
+                <button key={v} onClick={() => set({ position: v })}
+                  className={`flex-1 py-1.5 text-xs rounded-lg border transition ${style.position === v ? 'border-white text-white bg-white/10' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'}`}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <Field label="Couleur">
+            <label className="relative inline-flex items-center gap-2 cursor-pointer bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 hover:border-neutral-500 transition">
+              <div className="w-4 h-4 rounded-sm border border-white/20 shrink-0" style={{ background: style.color ?? '#6b7280' }} />
+              <span className="font-mono text-xs text-white">{(style.color ?? '#6b7280').toUpperCase()}</span>
+              <input type="color" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                value={style.color ?? '#6b7280'}
+                onChange={e => set({ color: e.target.value })} />
+            </label>
+          </Field>
+
+          <Field label={`Taille : ${style.size ?? 1}em`}>
+            <input type="range" min={0.7} max={1.5} step={0.05} value={style.size ?? 1}
+              onChange={e => set({ size: Number(e.target.value) })}
+              className="w-full accent-white" />
+          </Field>
+        </div>
+      )}
     </div>
   )
 }
@@ -790,9 +885,35 @@ function CustomForm({ section, dispatch }: { section: CustomSection; dispatch: R
   const update = (patch: Partial<CustomSection>) =>
     dispatch({ type: 'UPDATE_SECTION', section: { ...section, ...patch } })
 
+  const ts = section.titleStyle ?? {}
+  const setTs = (patch: Partial<CustomTitleStyle>) =>
+    update({ titleStyle: { ...ts, ...patch } })
+
+  const [showTitleStyle, setShowTitleStyle] = useState(false)
+
   return (
     <div className="space-y-4">
-      <Field label="Titre de la section">
+      {/* Titre */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-xs text-neutral-400">Titre de la section</label>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowTitleStyle(v => !v)}
+              className={`text-xs px-2 py-0.5 rounded-md border transition ${showTitleStyle ? 'border-white text-white bg-white/10' : 'border-neutral-700 text-neutral-500 hover:border-neutral-500 hover:text-neutral-300'}`}
+            >
+              Style
+            </button>
+            <HelpTooltip side="left" content={
+              <div className="space-y-1.5">
+                <p className="font-semibold text-white mb-1">Section libre</p>
+                <p>Donnez un titre à votre section (ex: Certifications, Prix, Publications…).</p>
+                <p>Cliquez sur <span className="font-medium text-neutral-200">Style</span> pour personnaliser la police, la taille, la couleur et la casse du titre.</p>
+                <p>L'éditeur supporte les titres H1/H2/H3, le gras, l'italique, les listes et la mise en couleur.</p>
+              </div>
+            } />
+          </div>
+        </div>
         <input
           type="text"
           value={section.title}
@@ -800,7 +921,96 @@ function CustomForm({ section, dispatch }: { section: CustomSection; dispatch: R
           placeholder="ex: Certifications, Publications, Prix…"
           className={cls.input}
         />
-      </Field>
+
+        {/* Panneau style du titre */}
+        {showTitleStyle && (
+          <div className="mt-3 p-3 bg-neutral-900 border border-neutral-800 rounded-xl space-y-3">
+            {/* Graisse + Style */}
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <p className="text-[10px] text-neutral-500 mb-1">Graisse</p>
+                <div className="flex gap-1">
+                  {([['normal', 'Normal'], ['semibold', 'Semi'], ['bold', 'Gras']] as const).map(([v, l]) => (
+                    <button key={v} onClick={() => setTs({ fontWeight: v })}
+                      className={`flex-1 py-1 text-[10px] rounded-md border transition ${(ts.fontWeight ?? 'bold') === v ? 'border-white text-white bg-white/10' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'}`}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] text-neutral-500 mb-1">Style</p>
+                <div className="flex gap-1">
+                  {([['normal', 'Normal'], ['italic', 'Italique']] as const).map(([v, l]) => (
+                    <button key={v} onClick={() => setTs({ fontStyle: v })}
+                      className={`flex-1 py-1 text-[10px] rounded-md border transition ${(ts.fontStyle ?? 'normal') === v ? 'border-white text-white bg-white/10' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'}`}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Casse */}
+            <div>
+              <p className="text-[10px] text-neutral-500 mb-1">Casse</p>
+              <div className="flex gap-1">
+                {([['none', 'Normal'], ['uppercase', 'MAJUSC'], ['lowercase', 'minusc'], ['capitalize', 'Initiales']] as const).map(([v, l]) => (
+                  <button key={v} onClick={() => setTs({ textTransform: v })}
+                    className={`flex-1 py-1 text-[10px] rounded-md border transition ${(ts.textTransform ?? 'uppercase') === v ? 'border-white text-white bg-white/10' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'}`}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Espacement lettres */}
+            <div>
+              <p className="text-[10px] text-neutral-500 mb-1">Espacement lettres</p>
+              <div className="flex gap-1">
+                {([['tight', 'Serré'], ['normal', 'Normal'], ['wide', 'Large'], ['widest', 'Très large']] as const).map(([v, l]) => (
+                  <button key={v} onClick={() => setTs({ letterSpacing: v })}
+                    className={`flex-1 py-1 text-[10px] rounded-md border transition ${(ts.letterSpacing ?? 'widest') === v ? 'border-white text-white bg-white/10' : 'border-neutral-700 text-neutral-400 hover:border-neutral-500'}`}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Alignement */}
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-neutral-500">Alignement</p>
+              <AlignButtons value={ts.textAlign} onChange={v => setTs({ textAlign: v })} />
+            </div>
+
+            {/* Taille + Couleur sur même ligne */}
+            <div className="grid grid-cols-2 gap-2 items-end">
+              <div>
+                <p className="text-[10px] text-neutral-500 mb-1">Taille{ts.fontSize ? ` : ${ts.fontSize}px` : ' (auto)'}</p>
+                <input type="range" min={8} max={36} step={1} value={ts.fontSize ?? 12}
+                  onChange={e => setTs({ fontSize: Number(e.target.value) })}
+                  className="w-full accent-white" />
+              </div>
+              <div>
+                <p className="text-[10px] text-neutral-500 mb-1">Couleur</p>
+                <label className="relative inline-flex items-center gap-2 cursor-pointer bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1.5 hover:border-neutral-500 transition w-full">
+                  <div className="w-3.5 h-3.5 rounded-sm border border-white/20 shrink-0" style={{ background: ts.color ?? '#6b7280' }} />
+                  <span className="font-mono text-[10px] text-white truncate">{(ts.color ?? '#6b7280').toUpperCase()}</span>
+                  <input type="color" className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    value={ts.color ?? '#6b7280'}
+                    onChange={e => setTs({ color: e.target.value })} />
+                </label>
+              </div>
+            </div>
+
+            {/* Reset */}
+            <button onClick={() => update({ titleStyle: {} })} className="text-[10px] text-neutral-600 hover:text-neutral-400 transition">
+              Réinitialiser le style du titre
+            </button>
+          </div>
+        )}
+      </div>
+
       <div>
         <div className="flex items-center justify-between mb-1">
           <label className="text-xs text-neutral-400">Contenu</label>

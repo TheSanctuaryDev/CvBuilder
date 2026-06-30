@@ -21,6 +21,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Cv>().ToTable("cvs");
         modelBuilder.Entity<CvVersion>().ToTable("cv_versions")
             .HasIndex(v => new { v.CvId, v.VersionNum }).IsUnique();
+        modelBuilder.Entity<CvVersion>()
+            .Property(v => v.CvData)
+            .HasColumnType("jsonb");
         modelBuilder.Entity<Payment>().ToTable("payments");
         modelBuilder.Entity<Template>().ToTable("templates")
             .HasIndex(t => t.TemplateKey).IsUnique();

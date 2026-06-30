@@ -8,10 +8,15 @@ export default function CustomSectionView({ section }: { section: CustomSection 
   return (
     <div className="mb-5">
       <h2
-        className="text-xs font-bold uppercase tracking-widest mb-2"
+        className="mb-2"
         style={{
-          color: 'var(--cv-accent-color, #6b7280)',
-          textAlign: section.textAlign ?? 'left',
+          color:         section.titleStyle?.color ?? 'var(--cv-accent-color, #6b7280)',
+          textAlign:     section.titleStyle?.textAlign ?? section.textAlign ?? 'left',
+          fontSize:      section.titleStyle?.fontSize ? `${section.titleStyle.fontSize}px` : '0.75rem',
+          fontWeight:    section.titleStyle?.fontWeight === 'semibold' ? 600 : section.titleStyle?.fontWeight === 'normal' ? 400 : 700,
+          fontStyle:     section.titleStyle?.fontStyle ?? 'normal',
+          textTransform: section.titleStyle?.textTransform ?? 'uppercase',
+          letterSpacing: section.titleStyle?.letterSpacing === 'tight' ? '-0.025em' : section.titleStyle?.letterSpacing === 'wide' ? '0.05em' : section.titleStyle?.letterSpacing === 'normal' ? 'normal' : '0.1em',
         }}
       >
         {section.title || 'Section personnalisée'}
