@@ -24,3 +24,16 @@ public record CvDetailDto(
     DateTime UpdatedAt,
     JsonElement? CvData
 );
+
+public record CvVersionSummaryDto(
+    Guid Id,
+    int VersionNum,
+    DateTime CreatedAt
+);
+
+public record CvVersionDetailDto(
+    Guid Id,
+    int VersionNum,
+    DateTime CreatedAt,
+    JsonElement? CvData
+);

@@ -131,4 +131,68 @@ public class CvsController(AppDbContext db) : ControllerBase
         await db.SaveChangesAsync();
         return NoContent();
     }
+
+    [HttpGet("{id:guid}/versions")]
+    public async Task<ActionResult<IEnumerable<CvVersionSummaryDto>>> GetVersions(Guid id)
+    {
+        if (CurrentUserId is not Guid userId) return Unauthorized();
+        if (!await db.Cvs.AnyAsync(c => c.Id == id && c.UserId == userId)) return NotFound();
+
+        var versions = await db.CvVersions
+            .Where(v => v.CvId == id)
+            .OrderByDescending(v => v.VersionNum)
+            .Select(v => new CvVersionSummaryDto(v.Id, v.VersionNum, v.CreatedAt))
+            .ToListAsync();
+
+        return Ok(versions);
+    }
+
+    [HttpGet("{id:guid}/versions/{vnum:int}")]
+    public async Task<ActionResult<CvVersionDetailDto>> GetVersion(Guid id, int vnum)
+    {
+        if (CurrentUserId is not Guid userId) return Unauthorized();
+        if (!await db.Cvs.AnyAsync(c => c.Id == id && c.UserId == userId)) return NotFound();
+
+        var version = await db.CvVersions
+            .FirstOrDefaultAsync(v => v.CvId == id && v.VersionNum == vnum);
+
+        if (version == null) return NotFound();
+
+        JsonElement? cvData = null;
+        if (version.CvData is { } raw && raw != "{}")
+        {
+            try { cvData = JsonSerializer.Deserialize<JsonElement>(raw); }
+            catch { /* données corrompues */ }
+        }
+
+        return Ok(new CvVersionDetailDto(version.Id, version.VersionNum, version.CreatedAt, cvData));
+    }
+
+    [HttpPost("{id:guid}/restore/{vnum:int}")]
+    public async Task<IActionResult> RestoreVersion(Guid id, int vnum)
+    {
+        if (CurrentUserId is not Guid userId) return Unauthorized();
+        var cv = await db.Cvs.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+        if (cv == null) return NotFound();
+
+        var targetVersion = await db.CvVersions
+            .FirstOrDefaultAsync(v => v.CvId == id && v.VersionNum == vnum);
+        if (targetVersion == null) return NotFound();
+
+        // Créer une nouvelle version avec le contenu de la version cible
+        var newVersionNum = cv.CurrentVersion + 1;
+        db.CvVersions.Add(new CvVersion
+        {
+            CvId = id,
+            VersionNum = newVersionNum,
+            CvData = targetVersion.CvData,
+            HtmlContent = targetVersion.HtmlContent,
+        });
+
+        cv.CurrentVersion = newVersionNum;
+        cv.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        return Ok(new { restoredFrom = vnum, newVersionNum });
+    }
 }
