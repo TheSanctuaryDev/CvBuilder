@@ -30,6 +30,27 @@ body {
 .tiptap p { margin: 0; }
 .tiptap p + p { margin-top: 0.2em; }
 
+/* Mode "plain" : la mise en forme décorative est masquée dans la zone d'édition.
+   Seul le CV preview affiche couleurs, tailles et polices personnalisées.
+   Le gras, l'italique, le souligné et le barré restent visibles (sémantiques). */
+.tiptap-plain span[style] {
+  color: inherit !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+  line-height: inherit !important;
+}
+.tiptap-plain mark {
+  background-color: rgba(255,255,255,0.12) !important;
+  color: inherit !important;
+}
+/* Indication visuelle discrète que du style est appliqué */
+.tiptap-plain span[style]::after {
+  content: "";
+}
+
+
 /* ── Tiptap dual-column ────────────────────────────────────────────────── */
 .tiptap div[data-type="dual-column"] {
   display: flex;

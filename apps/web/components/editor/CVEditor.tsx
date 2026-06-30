@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   Check, Circle, Loader2, AlertTriangle, ArrowLeft,
-  Download, ChevronUp, ChevronDown, Palette,
-  Undo2, Redo2, ZoomIn, ZoomOut,
+  Download, Palette, Undo2, Redo2, ZoomIn, ZoomOut,
 } from 'lucide-react'
 import { editorReducer } from '@/lib/editor-reducer'
 import { rawDataToSections } from '@/lib/cv-sections'
@@ -94,7 +93,9 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
   const [loading, setLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'dirty' | 'saving' | 'error'>('saved')
   const [mobileTab, setMobileTab] = useState<'preview' | 'edit'>('preview')
-  const [mobileSectionList, setMobileSectionList] = useState(false)
+  // Échelle adaptative pour l'aperçu mobile/tablette
+  const [cvScale, setCvScale] = useState(0.65)
+  const previewContainerRef = useRef<HTMLDivElement>(null)
   const [currentTemplateKey, setCurrentTemplateKey] = useState(initialTemplateKey)
   const [currentStyleTokens, setCurrentStyleTokens] = useState<StyleTokens>(initialTokens)
   const [templates, setTemplates] = useState<TemplateOption[]>([])
@@ -187,6 +188,19 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [state.isDirty, currentStyleTokens, cvId]) // currentStyleTokens déclenche le save sur changement de style
+
+  // Echelle adaptive pour l'aperçu : s'adapte à la largeur réelle du conteneur
+  useEffect(() => {
+    function update() {
+      if (!previewContainerRef.current) return
+      const w = previewContainerRef.current.offsetWidth - 32 // 32 = padding
+      setCvScale(Math.min(0.9, Math.max(0.3, w / 794)))
+    }
+    const obs = new ResizeObserver(update)
+    if (previewContainerRef.current) obs.observe(previewContainerRef.current)
+    update()
+    return () => obs.disconnect()
+  }, [])
 
   // BUG-17 : guard — ne pas sauvegarder si rien n'est dirty
   const forceSave = useCallback(async () => {
@@ -377,11 +391,16 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
         </div>
       </div>
 
-      {/* ── Onglets tablet ─────────────────────────────────────────── */}
-      <div className="hidden sm:flex lg:hidden border-b border-neutral-800 bg-neutral-950 shrink-0">
+      {/* ── Onglets mobile + tablette (< lg) ───────────────────── */}
+      <div className="flex lg:hidden border-b border-neutral-800 bg-neutral-950 shrink-0">
         {(['preview', 'edit'] as const).map(tab => (
-          <button key={tab} onClick={() => setMobileTab(tab)}
-            className={`px-6 py-2 text-sm transition ${mobileTab === tab ? 'text-white border-b-2 border-white' : 'text-neutral-400'}`}>
+          <button
+            key={tab}
+            onClick={() => setMobileTab(tab)}
+            className={`flex-1 py-3 text-sm font-medium transition ${
+              mobileTab === tab ? 'text-white border-b-2 border-white' : 'text-neutral-400'
+            }`}
+          >
             {tab === 'preview' ? 'Aperçu' : 'Édition'}
           </button>
         ))}
@@ -389,78 +408,61 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
 
       {/* ── Desktop (≥1024px) ────────────────────────────────────── */}
       <div className="hidden lg:flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto bg-neutral-200 flex justify-center items-start p-8"
-          onClick={() => setShowTemplatePicker(false)}>
+        <div
+          className="flex-1 overflow-auto bg-neutral-200 flex justify-center items-start p-8"
+          onClick={() => setShowTemplatePicker(false)}
+        >
           <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
-            <CVPreview sections={state.sections} activeSectionId={state.activeSectionId} dispatch={dispatch}
-              templateKey={currentTemplateKey} styleTokens={currentStyleTokens} />
+            <CVPreview
+              sections={state.sections}
+              activeSectionId={state.activeSectionId}
+              dispatch={dispatch}
+              templateKey={currentTemplateKey}
+              styleTokens={currentStyleTokens}
+            />
           </div>
         </div>
         <div className="w-96 border-l border-neutral-800 bg-neutral-950 overflow-y-auto">
-          <SectionPanel sections={state.sections} activeSectionId={state.activeSectionId} dispatch={dispatch}
-            styleTokens={currentStyleTokens} onStyleChange={handleStyleChange} />
+          <SectionPanel
+            sections={state.sections}
+            activeSectionId={state.activeSectionId}
+            dispatch={dispatch}
+            styleTokens={currentStyleTokens}
+            onStyleChange={handleStyleChange}
+          />
         </div>
       </div>
 
-      {/* ── Tablet (sm–lg) ──────────────────────────────────────── */}
-      <div className="hidden sm:flex lg:hidden flex-1 overflow-hidden">
+      {/* ── Mobile + Tablette (< lg) ─────────────────────────────── */}
+      <div className="flex lg:hidden flex-1 overflow-hidden">
         {mobileTab === 'preview' ? (
-          <div className="flex-1 overflow-auto bg-neutral-200 p-4 flex justify-center">
-            <div style={{ transform: 'scale(0.65)', transformOrigin: 'top center', width: 794 }}>
-              <CVPreview sections={state.sections} activeSectionId={state.activeSectionId}
-                templateKey={currentTemplateKey} styleTokens={currentStyleTokens}
-                dispatch={(action) => { dispatch(action); if (action.type === 'SET_ACTIVE') setMobileTab('edit') }} />
+          <div
+            ref={previewContainerRef}
+            className="flex-1 overflow-auto bg-neutral-200 p-4 flex justify-center items-start"
+          >
+            {/* Scale adaptatif calculé via ResizeObserver — s'ajuste à la largeur réelle */}
+            <div style={{ transform: `scale(${cvScale})`, transformOrigin: 'top center', width: 794 }}>
+              <CVPreview
+                sections={state.sections}
+                activeSectionId={state.activeSectionId}
+                templateKey={currentTemplateKey}
+                styleTokens={currentStyleTokens}
+                dispatch={action => {
+                  dispatch(action)
+                  if (action.type === 'SET_ACTIVE') setMobileTab('edit')
+                }}
+              />
             </div>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto bg-neutral-950">
-            <SectionPanel sections={state.sections} activeSectionId={state.activeSectionId} dispatch={dispatch}
-              styleTokens={currentStyleTokens} onStyleChange={handleStyleChange} />
-          </div>
-        )}
-      </div>
-
-      {/* ── Mobile (<sm) ─────────────────────────────────────────── */}
-      <div className="flex sm:hidden flex-col flex-1 overflow-hidden">
-        {/* BUG-16 : overflow:hidden + transformOrigin:top center pour éviter le débordement horizontal */}
-        <div className="overflow-hidden bg-neutral-200 shrink-0 flex justify-center" style={{ height: 320 }}>
-          <div style={{ transform: 'scale(0.38)', transformOrigin: 'top center', width: 794, pointerEvents: 'none' }}>
-            <CVPreview sections={state.sections} activeSectionId={null} dispatch={() => {}}
-              templateKey={currentTemplateKey} styleTokens={currentStyleTokens} isDragDisabled />
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto bg-neutral-950 p-4">
-          <p className="text-xs text-neutral-500 mb-3">Sections — tap pour éditer</p>
-          {[...state.sections].sort((a, b) => a.order - b.order).map((section, idx, arr) => (
-            <div key={section.id} className="flex items-center gap-2 mb-2">
-              <button
-                onClick={() => { dispatch({ type: 'SET_ACTIVE', id: section.id }); setMobileSectionList(true) }}
-                className={`flex-1 text-left bg-neutral-900 border rounded-lg px-4 py-2.5 text-sm transition
-                  ${section.hidden ? 'text-neutral-600 border-neutral-900' : 'text-white border-neutral-800 hover:border-neutral-600'}`}>
-                {SECTION_LABELS[section.type] ?? section.type}
-                {section.hidden && <span className="ml-2 text-xs text-neutral-600">(masqué)</span>}
-              </button>
-              <div className="flex flex-col gap-1">
-                <button disabled={idx === 0}
-                  onClick={() => { const ids = arr.map(s => s.id); [ids[idx-1], ids[idx]] = [ids[idx], ids[idx-1]]; dispatch({ type: 'REORDER', ids }) }}
-                  className="text-neutral-400 hover:text-white disabled:opacity-30 transition px-1"><ChevronUp className="w-4 h-4" /></button>
-                <button disabled={idx === arr.length - 1}
-                  onClick={() => { const ids = arr.map(s => s.id); [ids[idx], ids[idx+1]] = [ids[idx+1], ids[idx]]; dispatch({ type: 'REORDER', ids }) }}
-                  className="text-neutral-400 hover:text-white disabled:opacity-30 transition px-1"><ChevronDown className="w-4 h-4" /></button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {mobileSectionList && state.activeSectionId && (
-          <div className="fixed inset-0 z-50 flex flex-col justify-end">
-            <div className="flex-1 bg-black/60" onClick={() => setMobileSectionList(false)} />
-            <div className="bg-neutral-950 rounded-t-2xl border-t border-neutral-800 overflow-y-auto" style={{ maxHeight: '70vh' }}>
-              <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 bg-neutral-700 rounded-full" /></div>
-              <SectionPanel sections={state.sections} activeSectionId={state.activeSectionId}
-                dispatch={(action) => { dispatch(action); if (action.type === 'SET_ACTIVE' && action.id === null) setMobileSectionList(false) }}
-                styleTokens={currentStyleTokens} onStyleChange={handleStyleChange} />
-            </div>
+            <SectionPanel
+              sections={state.sections}
+              activeSectionId={state.activeSectionId}
+              dispatch={dispatch}
+              styleTokens={currentStyleTokens}
+              onStyleChange={handleStyleChange}
+            />
           </div>
         )}
       </div>
