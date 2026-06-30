@@ -70,10 +70,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 2. Input validation
-    const { sections, styleTokens } = (await req.json()) as { sections: CvSection[], styleTokens?: StyleTokens }
+    // 2. Input validation + BUG-02 : vérification ownership du CV
+    const { cvId, sections, styleTokens } = (await req.json()) as { cvId?: string; sections: CvSection[], styleTokens?: StyleTokens }
     if (!Array.isArray(sections) || sections.length > 20) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    }
+    if (cvId) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
+      const ownerCheck = await fetch(`${apiUrl}/api/cvs/${cvId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      })
+      if (!ownerCheck.ok) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const tokens = parseTokens(styleTokens ? JSON.stringify(styleTokens) : null)

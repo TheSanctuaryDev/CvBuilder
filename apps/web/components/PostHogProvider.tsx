@@ -13,7 +13,8 @@ function PostHogPageView() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (!POSTHOG_KEY || !posthog.__loaded) return
+    if (!POSTHOG_KEY) return
+    // BUG-21 : __loaded est une API interne — on capture directement (PostHog bufferise si non init)
     const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '')
     posthog.capture('$pageview', { $current_url: url })
   }, [pathname, searchParams])

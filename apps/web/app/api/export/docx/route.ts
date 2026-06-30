@@ -7,9 +7,23 @@ import {
 import type { CvSection, ExperienceSection, FormationSection, CustomSection } from '@/types/editor'
 import { parseTokens, tokensToDocxTheme, type StyleTokens } from '@/components/templates/registry'
 
-/** Retire les balises HTML (Tiptap rich text) pour l'export DOCX plain-text */
+/** Retire les balises HTML pour l'export DOCX plain-text — BUG-27 : entités HTML complètes */
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim()
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&hellip;/g, '…')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .trim()
 }
 
 function buildDocxChildren(sections: CvSection[], secondaryColor: string): Paragraph[] {
@@ -156,10 +170,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 2. Input validation
-    const { sections, styleTokens } = (await req.json()) as { sections: CvSection[], styleTokens?: StyleTokens }
+    // 2. Input validation + BUG-02 : vérification ownership du CV
+    const { cvId, sections, styleTokens } = (await req.json()) as { cvId?: string; sections: CvSection[], styleTokens?: StyleTokens }
     if (!Array.isArray(sections) || sections.length > 20) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    }
+    if (cvId) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
+      const ownerCheck = await fetch(`${apiUrl}/api/cvs/${cvId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      })
+      if (!ownerCheck.ok) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const tokens = parseTokens(styleTokens ? JSON.stringify(styleTokens) : null)

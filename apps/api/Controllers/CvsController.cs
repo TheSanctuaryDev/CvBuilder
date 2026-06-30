@@ -69,6 +69,9 @@ public class CvsController(AppDbContext db) : ControllerBase
         var cv = await db.Cvs.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
         if (cv == null) return NotFound();
 
+        // BUG-13 : ne sauvegarder que si au moins un champ a changé
+        bool changed = false;
+
         if (request.CvData.HasValue)
         {
             var cvDataJson = request.CvData.Value.GetRawText();
@@ -79,10 +82,17 @@ public class CvsController(AppDbContext db) : ControllerBase
                 db.CvVersions.Add(new CvVersion { CvId = id, VersionNum = cv.CurrentVersion, CvData = cvDataJson });
             else
                 version.CvData = cvDataJson;
+
+            changed = true;
         }
 
-        if (request.TemplateKey is { } newKey)
+        if (request.TemplateKey is { } newKey && newKey != cv.TemplateKey)
+        {
             cv.TemplateKey = newKey;
+            changed = true;
+        }
+
+        if (!changed) return NoContent();
 
         cv.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
@@ -94,12 +104,9 @@ public class CvsController(AppDbContext db) : ControllerBase
     {
         if (CurrentUserId is not Guid userId) return Unauthorized();
 
-        // Créer le profil si inexistant (première action de l'utilisateur)
+        // BUG-18 + BUG-05 : profil + CV + version initiale créés en un seul SaveChangesAsync atomique
         if (!await db.Profiles.AnyAsync(p => p.Id == userId))
-        {
             db.Profiles.Add(new Profile { Id = userId });
-            await db.SaveChangesAsync();
-        }
 
         var cv = new Cv
         {
@@ -108,8 +115,11 @@ public class CvsController(AppDbContext db) : ControllerBase
             TemplateKey = request.TemplateKey,
             IsPremium = request.IsPremium
         };
-
         db.Cvs.Add(cv);
+
+        // BUG-05 : créer la version initiale atomiquement avec le CV
+        db.CvVersions.Add(new CvVersion { CvId = cv.Id, VersionNum = 1, CvData = "{}" });
+
         await db.SaveChangesAsync();
 
         var dto = new CvDto(

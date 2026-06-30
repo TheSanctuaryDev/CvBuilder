@@ -65,10 +65,12 @@ export default function RichTextEditor({ content, onChange, placeholder, minHeig
     },
   })
 
-  // BUG-07 : destroy Tiptap pour éviter la fuite mémoire au démontage
+  // BUG-08 : [] (pas [editor]) — détruire uniquement au démontage du composant,
+  // pas à chaque changement de référence editor (ce qui détruirait l'éditeur actif)
   useEffect(() => {
     return () => { editor?.destroy() }
-  }, [editor])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Mise à jour depuis l'extérieur (ex : amélioration IA) — BUG-08 : normalise '<p></p>' → ''
   useEffect(() => {

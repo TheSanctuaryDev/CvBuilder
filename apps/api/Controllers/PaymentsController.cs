@@ -149,10 +149,10 @@ public class PaymentsController(AppDbContext db, FedaPayService fedaPay, IConfig
 
         if (timestamp == null || v1 == null) return false;
 
-        // Rejeter les webhooks datant de plus de 5 minutes (protection contre le replay)
+        // BUG-11 : fenêtre anti-replay réduite à 60s (300s était trop large)
         if (!long.TryParse(timestamp, out var ts)) return false;
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        if (Math.Abs(now - ts) > 300) return false;
+        if (Math.Abs(now - ts) > 60) return false;
 
         var signedPayload = $"{timestamp}.{payload}";
         var key = Encoding.UTF8.GetBytes(secret);

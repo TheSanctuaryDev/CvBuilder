@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { fetchTemplates, createCv, patchCv } from '@/lib/api'
 import { createClient } from '@/lib/supabase/client'
@@ -59,7 +59,8 @@ function isValidEmail(v: string) {
 }
 
 function isValidNumber(v: string) {
-  return /^[\d\s\-]{4,15}$/.test(v)
+  // BUG-26 : rejeter les chaînes composées uniquement d'espaces/tirets
+  return /^[\d\s\-]{4,15}$/.test(v) && /\d{4,}/.test(v.replace(/\D/g, ''))
 }
 
 function NouveauCvForm() {
@@ -79,6 +80,7 @@ function NouveauCvForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [pendingDraft, setPendingDraft] = useState<WizardDraft | null>(null)
+  const isSubmittingRef = useRef(false) // BUG-03 : guard contre la double soumission
 
   useEffect(() => {
     fetchTemplates()
@@ -98,7 +100,8 @@ function NouveauCvForm() {
       setSkills(draft.skills.length ? draft.skills : [''])
       setPhones(draft.phones?.length ? draft.phones : [{ indicatif: '+229', number: '' }])
       setEmails(draft.emails?.length ? draft.emails : [''])
-      setStep(7)
+      // BUG-16 : pas de setStep(7) ici — le spinner (pendingDraft && templates=[]) couvre le chargement.
+      // Afficher step 7 avec template undefined causerait "Template: —"
       setPendingDraft(draft)
     } catch {
       sessionStorage.removeItem(DRAFT_KEY)
@@ -125,6 +128,9 @@ function NouveauCvForm() {
   }
 
   async function submitCv(draft: WizardDraft, template: Template) {
+    // BUG-03 : guard synchrone contre les doubles soumissions
+    if (isSubmittingRef.current) return
+    isSubmittingRef.current = true
     setLoading(true)
     setError('')
     const finalData: CvData = {
@@ -149,6 +155,7 @@ function NouveauCvForm() {
     } catch {
       setError('Erreur lors de la création du CV. Réessayez.')
       setLoading(false)
+      isSubmittingRef.current = false
     }
   }
 

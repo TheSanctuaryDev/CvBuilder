@@ -158,7 +158,8 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
   if (!section) {
     const existingTypes = new Set(sections.map(s => s.type))
     const available = CATALOG.filter(c => c.multi || !existingTypes.has(c.type))
-    const maxOrder  = Math.max(...sections.map(s => s.order), -1)
+    // BUG-19 : reduce() au lieu de spread dans Math.max (évite RangeError sur grandes listes)
+    const maxOrder  = sections.reduce((m, s) => Math.max(m, s.order), -1)
 
     return (
       <div className="flex flex-col h-full">
@@ -225,9 +226,12 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
     )
   }
 
+  // BUG-23 : confirmation deux étapes sans window.confirm() (bloquant + impossible à tester SSR)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   function handleDelete() {
-    if (!confirm('Supprimer cette section ?')) return
+    if (!confirmingDelete) { setConfirmingDelete(true); return }
     dispatch({ type: 'DELETE_SECTION', id: section!.id })
+    setConfirmingDelete(false)
   }
 
   const isHidden = !!section.hidden
@@ -289,9 +293,20 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
 
       {section.type !== 'header' && (
         <div className="p-5 border-t border-neutral-800 shrink-0">
-          <button onClick={handleDelete} className="w-full text-center text-xs text-neutral-600 hover:text-red-400 transition py-1">
-            Supprimer cette section
-          </button>
+          {confirmingDelete ? (
+            <div className="flex gap-2">
+              <button onClick={handleDelete} className="flex-1 text-center text-xs text-red-400 hover:text-red-300 transition py-1 font-medium">
+                Confirmer la suppression
+              </button>
+              <button onClick={() => setConfirmingDelete(false)} className="flex-1 text-center text-xs text-neutral-500 hover:text-white transition py-1">
+                Annuler
+              </button>
+            </div>
+          ) : (
+            <button onClick={handleDelete} className="w-full text-center text-xs text-neutral-600 hover:text-red-400 transition py-1">
+              Supprimer cette section
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -562,10 +577,12 @@ function SummaryForm({
   dispatch: React.Dispatch<EditorAction>
 }) {
   const [loading, setLoading] = useState(false)
+  const [aiError, setAiError] = useState('') // BUG-14
 
   async function aiEnhance() {
     if (!section.text.trim()) return
     setLoading(true)
+    setAiError('')
     try {
       const auth = await getAuthHeader()
       const res = await fetch('/api/ai/enhance', {
@@ -576,8 +593,11 @@ function SummaryForm({
       if (res.ok) {
         const { enhanced } = await res.json()
         dispatch({ type: 'UPDATE_SECTION', section: { ...section, text: enhanced } })
+      } else {
+        setAiError('Erreur IA — réessayez.')
       }
-    } finally { setLoading(false) }
+    } catch { setAiError('Erreur IA — réessayez.') }
+    finally { setLoading(false) }
   }
 
   return (
@@ -598,6 +618,7 @@ function SummaryForm({
           IA
         </button>
       </div>
+      {aiError && <p className="text-xs text-red-400">{aiError}</p>}
       <RichTextEditor
         content={section.text}
         onChange={text => dispatch({ type: 'UPDATE_SECTION', section: { ...section, text } })}
@@ -610,6 +631,7 @@ function SummaryForm({
 
 function ExperienceForm({ section, dispatch }: { section: ExperienceSection; dispatch: React.Dispatch<EditorAction> }) {
   const [enhancing, setEnhancing] = useState<string | null>(null)
+  const [enhanceError, setEnhanceError] = useState('') // BUG-14
 
   function updateEntry(id: string, patch: Partial<ExperienceEntry>) {
     dispatch({ type: 'UPDATE_SECTION', section: { ...section, entries: section.entries.map(e => e.id === id ? { ...e, ...patch } : e) } })
@@ -618,6 +640,7 @@ function ExperienceForm({ section, dispatch }: { section: ExperienceSection; dis
   async function aiEnhanceDesc(entry: ExperienceEntry) {
     if (!entry.description.trim()) return
     setEnhancing(entry.id)
+    setEnhanceError('')
     try {
       const auth = await getAuthHeader()
       const res = await fetch('/api/ai/enhance', {
@@ -626,7 +649,9 @@ function ExperienceForm({ section, dispatch }: { section: ExperienceSection; dis
         body: JSON.stringify({ text: entry.description, type: 'experience', context: `${entry.title} at ${entry.company}` }),
       })
       if (res.ok) { const { enhanced } = await res.json(); updateEntry(entry.id, { description: enhanced }) }
-    } finally { setEnhancing(null) }
+      else { setEnhanceError('Erreur IA — réessayez.') }
+    } catch { setEnhanceError('Erreur IA — réessayez.') }
+    finally { setEnhancing(null) }
   }
 
   function duplicateEntry(entry: ExperienceEntry) {
@@ -686,6 +711,7 @@ function ExperienceForm({ section, dispatch }: { section: ExperienceSection; dis
                   IA
                 </button>
               </div>
+              {enhanceError && <p className="text-xs text-red-400 mb-1">{enhanceError}</p>}
               <RichTextEditor
                 key={entry.id}
                 content={entry.description}

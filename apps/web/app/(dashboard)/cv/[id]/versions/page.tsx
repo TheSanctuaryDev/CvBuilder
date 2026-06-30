@@ -71,20 +71,24 @@ export default function VersionsPage({ params }: { params: Promise<{ id: string 
       const token = await getToken()
       if (!token) { router.push('/login'); return }
 
-      const [cvRes, vRes] = await Promise.all([
-        fetch(`${API_URL}/api/cvs/${id}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }),
-        fetch(`${API_URL}/api/cvs/${id}/versions`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }),
-      ])
+      // BUG-06 : json() wrappé dans try/catch pour éviter le spinner infini
+      try {
+        const [cvRes, vRes] = await Promise.all([
+          fetch(`${API_URL}/api/cvs/${id}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }),
+          fetch(`${API_URL}/api/cvs/${id}/versions`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }),
+        ])
 
-      if (!cvRes.ok || !vRes.ok) { router.push('/dashboard'); return }
+        if (!cvRes.ok || !vRes.ok) { router.push('/dashboard'); return }
 
-      const cv = await cvRes.json()
-      const vs = await vRes.json() as VersionSummary[]
-      setCvMeta({ title: cv.title, currentVersion: cv.currentVersion })
-      setVersions(vs)
-      setLoadingList(false)
+        const cv = await cvRes.json()
+        const vs = await vRes.json() as VersionSummary[]
+        setCvMeta({ title: cv.title, currentVersion: cv.currentVersion })
+        setVersions(vs)
+        setLoadingList(false)
 
-      if (vs.length > 0) loadVersionDetail(vs[0].versionNum, token)
+        // BUG-15 : await pour capturer les erreurs éventuelles
+        if (vs.length > 0) await loadVersionDetail(vs[0].versionNum, token)
+      } catch { router.push('/dashboard') }
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps

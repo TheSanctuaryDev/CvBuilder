@@ -7,13 +7,14 @@ using CvBuilderApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// CORS — Next.js
+// CORS — BUG-22 : support de plusieurs origines séparées par virgule
+var allowedOrigins = (builder.Configuration["AllowedOrigins"] ?? "http://localhost:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("NextJs", policy =>
     {
-        policy.WithOrigins(
-                builder.Configuration["AllowedOrigins"] ?? "http://localhost:3000")
+        policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

@@ -6,7 +6,11 @@ import { parseTokens, type StyleTokens } from '@/components/templates/registry'
 
 export default async function CvEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  // BUG-25 : getUser() valide le JWT côté Supabase (vs getSession() qui lit uniquement le cookie)
   const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) redirect('/login')
+
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) redirect('/login')
 

@@ -45,15 +45,17 @@ public class GenerateController(AppDbContext db, AiProviderResolver resolver, Em
             .Where(v => v.CvId == id && v.VersionNum == cv.CurrentVersion)
             .FirstOrDefaultAsync(ct);
 
+        // BUG-01 : utiliser JsonSerializer pour éviter l'injection JSON via cv.Title
+        var fallbackJson = JsonSerializer.Serialize(new { fullName = cv.Title });
         JsonElement cvData;
         if (existingVersion?.CvData is { } raw && raw != "{}")
         {
             try { cvData = JsonSerializer.Deserialize<JsonElement>(raw); }
-            catch { cvData = JsonSerializer.Deserialize<JsonElement>($"{{\"fullName\":\"{cv.Title}\"}}"); }
+            catch { cvData = JsonSerializer.Deserialize<JsonElement>(fallbackJson); }
         }
         else
         {
-            cvData = JsonSerializer.Deserialize<JsonElement>($"{{\"fullName\":\"{cv.Title}\"}}");
+            cvData = JsonSerializer.Deserialize<JsonElement>(fallbackJson);
         }
 
         // Configurer SSE

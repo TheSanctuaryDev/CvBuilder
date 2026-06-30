@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState, useRef, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -35,19 +35,27 @@ export default function CvDetailPage({
   const [genStatus, setGenStatus] = useState<GenerateStatus>('idle')
   const [genMsg, setGenMsg] = useState('')
   const [genProvider, setGenProvider] = useState('')
+  const isGeneratingRef = useRef(false)   // BUG-09 : guard double-clic SSE
+  const navTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null) // BUG-20
+
+  useEffect(() => {
+    return () => { if (navTimerRef.current) clearTimeout(navTimerRef.current) } // BUG-20
+  }, [])
 
   useEffect(() => {
     async function load() {
       const token = await getToken()
       if (!token) { router.push('/login'); return }
-      const res = await fetch(`${API_URL}/api/cvs/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store',
-      })
-      if (res.status === 404) { router.push('/dashboard'); return }
-      if (!res.ok) { router.push('/dashboard'); return }
-      setCv(await res.json())
-      setLoading(false)
+      try {
+        const res = await fetch(`${API_URL}/api/cvs/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        })
+        if (res.status === 404) { router.push('/dashboard'); return }
+        if (!res.ok) { router.push('/dashboard'); return }
+        setCv(await res.json()) // BUG-06 : json() peut throw, wrappé dans try/catch
+        setLoading(false)
+      } catch { router.push('/dashboard') }
     }
     load()
   }, [id, router])
@@ -64,6 +72,9 @@ export default function CvDetailPage({
   }, [id, payment])
 
   async function handleGenerate() {
+    // BUG-09 : guard synchrone contre les doubles appels
+    if (isGeneratingRef.current) return
+    isGeneratingRef.current = true
     trackEvent('cv_generation_started', { cvId: id, templateKey: cv?.templateKey })
     setGenStatus('connecting')
     setGenMsg('Connexion au service IA...')
@@ -79,6 +90,7 @@ export default function CvDetailPage({
     if (!res.ok || !res.body) {
       setGenStatus('error')
       setGenMsg('Erreur de connexion au service IA.')
+      isGeneratingRef.current = false
       return
     }
 
@@ -105,17 +117,19 @@ export default function CvDetailPage({
             setGenStatus('done')
             setGenMsg('CV enrichi avec succès !')
             trackEvent('cv_generation_success', { cvId: id, provider: evt.data.provider })
-            // Recharger le CV puis ouvrir l'éditeur
+            isGeneratingRef.current = false
             const token2 = await getToken()
             const r = await fetch(`${API_URL}/api/cvs/${id}`, {
               headers: { Authorization: `Bearer ${token2}` },
               cache: 'no-store',
             })
             if (r.ok) setCv(await r.json())
-            setTimeout(() => router.push(`/cv/${id}/edit`), 1200)
+            // BUG-20 : stocker le timer pour pouvoir l'annuler si démontage
+            navTimerRef.current = setTimeout(() => router.push(`/cv/${id}/edit`), 1200)
           } else if (evt.type === 'error') {
             setGenStatus('error')
             setGenMsg(evt.data.msg ?? 'Erreur lors de la génération.')
+            isGeneratingRef.current = false
           }
         } catch {
           // ligne SSE malformée, on ignore

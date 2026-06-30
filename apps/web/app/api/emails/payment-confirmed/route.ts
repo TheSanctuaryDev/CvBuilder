@@ -20,7 +20,9 @@ export async function POST(req: NextRequest) {
   const { cvId, name } = (await req.json().catch(() => ({}))) as { cvId?: string; name?: string }
   if (!cvId) return NextResponse.json({ error: 'cvId requis' }, { status: 400 })
 
-  const displayName = name || user.email.split('@')[0]
+  const rawName = name || user.email.split('@')[0]
+  // BUG-17 : échapper le nom pour éviter l'injection HTML dans l'email
+  const displayName = rawName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
   const html = `
 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;">

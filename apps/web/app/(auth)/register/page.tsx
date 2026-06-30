@@ -50,8 +50,9 @@ function RegisterForm() {
       body: JSON.stringify({ name: fullName }),
     }).catch(() => {})
 
+    // BUG-12/24 : supprimer router.refresh() — cause une race condition et un flash visuel.
+    // Le middleware Supabase rafraîchit la session via cookie automatiquement.
     router.push(returnTo)
-    router.refresh()
   }
 
   return (

@@ -15,11 +15,13 @@ import type {
 
 export function cvDataToSections(data: CvData): CvSection[] {
   const sections: CvSection[] = []
+  // BUG-04 : compteur d'ordre incrémental pour éviter le sort instable
+  let nextOrder = 0
 
   const header: HeaderSection = {
     id: nanoid(),
     type: 'header',
-    order: 0,
+    order: nextOrder++,
     fullName: data.fullName,
     jobTitle: data.fieldOfActivity ?? '',
     emails: data.emails?.length ? data.emails : [],
@@ -31,14 +33,14 @@ export function cvDataToSections(data: CvData): CvSection[] {
   sections.push(header)
 
   if (data.summary) {
-    sections.push({ id: nanoid(), type: 'summary', order: 0, text: data.summary } satisfies SummarySection)
+    sections.push({ id: nanoid(), type: 'summary', order: nextOrder++, text: data.summary } satisfies SummarySection)
   }
 
   if (data.experience?.length) {
     sections.push({
       id: nanoid(),
       type: 'experience',
-      order: 0,
+      order: nextOrder++,
       entries: data.experience.map(exp => ({
         id: nanoid(), title: '', company: '', startDate: '', endDate: '', description: exp,
       })),
@@ -49,7 +51,7 @@ export function cvDataToSections(data: CvData): CvSection[] {
     sections.push({
       id: nanoid(),
       type: 'formation',
-      order: 0,
+      order: nextOrder++,
       entries: data.formation.map(f => ({
         id: nanoid(), degree: '', school: '', year: '', description: f,
       })),
@@ -57,19 +59,19 @@ export function cvDataToSections(data: CvData): CvSection[] {
   }
 
   if (data.skills?.length) {
-    sections.push({ id: nanoid(), type: 'skills', order: 0, items: data.skills } satisfies SkillsSection)
+    sections.push({ id: nanoid(), type: 'skills', order: nextOrder++, items: data.skills } satisfies SkillsSection)
   }
 
   if (data.languages) {
-    sections.push({ id: nanoid(), type: 'languages', order: 0, items: [data.languages] } satisfies LanguagesSection)
+    sections.push({ id: nanoid(), type: 'languages', order: nextOrder++, items: [data.languages] } satisfies LanguagesSection)
   }
 
   if (data.interests?.length) {
-    sections.push({ id: nanoid(), type: 'interests', order: 0, items: data.interests } satisfies InterestsSection)
+    sections.push({ id: nanoid(), type: 'interests', order: nextOrder++, items: data.interests } satisfies InterestsSection)
   }
 
   if (data.references?.length) {
-    sections.push({ id: nanoid(), type: 'references', order: 0, items: data.references } satisfies ReferencesSection)
+    sections.push({ id: nanoid(), type: 'references', order: nextOrder++, items: data.references } satisfies ReferencesSection)
   }
 
   // Réappliquer l'ordre sauvegardé (drag-and-drop persisté)

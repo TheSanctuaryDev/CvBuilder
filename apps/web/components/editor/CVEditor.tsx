@@ -160,6 +160,8 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
     const capturedVersion = ++saveVersionRef.current  // BUG-09
     debounceRef.current = setTimeout(async () => {
       setSaveStatus('saving')
+      // BUG-07 : AbortController pour annuler le fetch si démontage du composant
+      const abortCtrl = new AbortController()
       try {
         const auth = await getAuthHeader()
         await fetch(`${API_URL}/api/cvs/${cvId}`, {
@@ -168,6 +170,7 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
           body: JSON.stringify({
             cvData: { sections: sectionsRef.current, _styleTokens: styleTokensRef.current },
           }),
+          signal: abortCtrl.signal,
         })
         // BUG-09 : ne pas marquer saved si une nouvelle version a démarré
         if (saveVersionRef.current === capturedVersion) {
@@ -175,9 +178,13 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
           styleDirtyRef.current = false
           setSaveStatus('saved')
         }
-      } catch { setSaveStatus('error') }
+      } catch (e) {
+        if ((e as Error)?.name !== 'AbortError') setSaveStatus('error')
+      }
     }, 2000)
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
   }, [state.isDirty, currentStyleTokens, cvId]) // currentStyleTokens déclenche le save sur changement de style
 
   // BUG-17 : guard — ne pas sauvegarder si rien n'est dirty
@@ -260,7 +267,7 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
     const res = await fetch('/api/export/docx', {
       method: 'POST',
       headers: { Authorization: auth, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sections: state.sections, templateKey: currentTemplateKey, styleTokens: currentStyleTokens }),
+      body: JSON.stringify({ cvId, sections: state.sections, templateKey: currentTemplateKey, styleTokens: currentStyleTokens }),
     })
     if (!res.ok) return alert('Erreur export Word')
     const blob = await res.blob()
