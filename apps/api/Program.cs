@@ -27,26 +27,43 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // FedaPay
 builder.Services.AddHttpClient<FedaPayService>();
 
+// Email (Resend)
+builder.Services.AddHttpClient<EmailService>();
+
 // AI Services
 builder.Services.AddHttpClient<ClaudeAiService>();
 builder.Services.AddHttpClient<GeminiAiService>();
 builder.Services.AddScoped<AiProviderResolver>();
 
-// JWT Auth Supabase (HS256)
+// JWT Auth Supabase (ES256 via JWKS)
+var projectRef = builder.Configuration["Supabase:ProjectRef"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Authority = $"https://{projectRef}.supabase.co/auth/v1";
+        options.MetadataAddress = $"https://{projectRef}.supabase.co/auth/v1/.well-known/openid-configuration";
+        options.RequireHttpsMetadata = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Supabase:JwtSecret"]!)),
             ValidateIssuer = true,
-            ValidIssuer = $"https://{builder.Configuration["Supabase:ProjectRef"]}.supabase.co/auth/v1",
+            ValidIssuer = $"https://{projectRef}.supabase.co/auth/v1",
             ValidateAudience = true,
             ValidAudience = "authenticated",
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromSeconds(30)
+        };
+        options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+        {
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine($"[JWT] FAILED: {ctx.Exception.GetType().Name}: {ctx.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                Console.WriteLine($"[JWT] OK — sub: {ctx.Principal?.FindFirst("sub")?.Value}");
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -63,6 +80,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (app.Environment.IsDevelopment())
+    Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 app.UseStaticFiles();
 app.UseCors("NextJs");
 app.UseAuthentication();

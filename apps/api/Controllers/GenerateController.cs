@@ -13,7 +13,7 @@ namespace CvBuilderApi.Controllers;
 [ApiController]
 [Route("api/generate")]
 [Authorize]
-public class GenerateController(AppDbContext db, AiProviderResolver resolver) : ControllerBase
+public class GenerateController(AppDbContext db, AiProviderResolver resolver, EmailService email) : ControllerBase
 {
     private Guid? CurrentUserId
     {
@@ -107,6 +107,13 @@ public class GenerateController(AppDbContext db, AiProviderResolver resolver) : 
             cv.CurrentVersion = newVersionNum;
             cv.UpdatedAt = DateTime.UtcNow;
             await db.SaveChangesAsync(ct);
+
+            // Email "CV prêt" (fire-and-forget, non bloquant)
+            var userEmail = User.FindFirstValue("email") ?? "";
+            var profile   = await db.Profiles.FindAsync([userId], ct);
+            var userName  = profile?.FullName ?? userEmail.Split('@')[0];
+            if (!string.IsNullOrEmpty(userEmail))
+                _ = email.SendCvReadyAsync(userEmail, userName, id.ToString());
 
             // Désérialiser pour renvoyer au client
             var enrichedData = JsonSerializer.Deserialize<JsonElement>(jsonResult);

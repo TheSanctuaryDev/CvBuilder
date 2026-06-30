@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ChevronLeft, FileText, ArrowRight, Sparkles, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
 import PayButton from '@/components/PayButton'
+import { trackEvent } from '@/components/PostHogProvider'
 import type { Cv } from '@/types'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
@@ -51,7 +52,19 @@ export default function CvDetailPage({
     load()
   }, [id, router])
 
+  // Email "paiement confirmé" + event analytics — fire-and-forget quand l'user revient après paiement
+  useEffect(() => {
+    if (payment !== 'success') return
+    trackEvent('payment_success', { cvId: id, provider: 'fedapay' })
+    fetch('/api/emails/payment-confirmed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cvId: id }),
+    }).catch(() => {})
+  }, [id, payment])
+
   async function handleGenerate() {
+    trackEvent('cv_generation_started', { cvId: id, templateKey: cv?.templateKey })
     setGenStatus('connecting')
     setGenMsg('Connexion au service IA...')
     setGenProvider('')
@@ -91,6 +104,7 @@ export default function CvDetailPage({
             setGenProvider(evt.data.provider ?? '')
             setGenStatus('done')
             setGenMsg('CV enrichi avec succès !')
+            trackEvent('cv_generation_success', { cvId: id, provider: evt.data.provider })
             // Recharger le CV puis ouvrir l'éditeur
             const token2 = await getToken()
             const r = await fetch(`${API_URL}/api/cvs/${id}`, {

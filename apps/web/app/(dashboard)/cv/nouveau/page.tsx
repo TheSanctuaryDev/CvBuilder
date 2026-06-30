@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ChevronLeft, ChevronRight, X, ArrowRight, Loader2, Plus, Check } from 'lucide-react'
 import type { Template, CvData, PhoneEntry } from '@/types'
 import { COUNTRY_CODES } from '@/lib/country-codes'
+import { trackEvent } from '@/components/PostHogProvider'
 
 const TOTAL_STEPS = 7
 const DRAFT_KEY = 'cv_wizard_draft'
@@ -216,7 +217,7 @@ function NouveauCvForm() {
               return (
                 <button
                   key={t.templateKey}
-                  onClick={() => setSelectedKey(t.templateKey)}
+                  onClick={() => { setSelectedKey(t.templateKey); trackEvent('template_selected', { templateKey: t.templateKey }) }}
                   className={`relative text-left rounded-xl overflow-hidden border-2 transition-all ${
                     selected ? 'border-white scale-[1.02]' : 'border-neutral-700 hover:border-neutral-500'
                   }`}

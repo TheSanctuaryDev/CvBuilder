@@ -43,6 +43,13 @@ function RegisterForm() {
       return
     }
 
+    // Email de bienvenue — fire-and-forget, non bloquant
+    fetch('/api/emails/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: fullName }),
+    }).catch(() => {})
+
     router.push(returnTo)
     router.refresh()
   }

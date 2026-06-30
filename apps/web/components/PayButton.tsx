@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { initPayment } from '@/lib/api'
+import { trackEvent } from '@/components/PostHogProvider'
 
 export default function PayButton({ cvId }: { cvId: string }) {
   const [loading, setLoading] = useState(false)
@@ -10,6 +11,7 @@ export default function PayButton({ cvId }: { cvId: string }) {
   async function handlePay() {
     setLoading(true)
     setError(null)
+    trackEvent('payment_initiated', { cvId, provider: 'fedapay' })
     try {
       const { paymentUrl } = await initPayment(cvId)
       window.location.href = paymentUrl

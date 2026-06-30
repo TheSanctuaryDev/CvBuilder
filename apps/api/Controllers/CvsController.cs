@@ -69,19 +69,20 @@ public class CvsController(AppDbContext db) : ControllerBase
         var cv = await db.Cvs.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
         if (cv == null) return NotFound();
 
-        var cvDataJson = request.CvData.GetRawText();
-
-        var version = await db.CvVersions
-            .FirstOrDefaultAsync(v => v.CvId == id && v.VersionNum == cv.CurrentVersion);
-
-        if (version == null)
+        if (request.CvData.HasValue)
         {
-            db.CvVersions.Add(new CvVersion { CvId = id, VersionNum = cv.CurrentVersion, CvData = cvDataJson });
+            var cvDataJson = request.CvData.Value.GetRawText();
+            var version = await db.CvVersions
+                .FirstOrDefaultAsync(v => v.CvId == id && v.VersionNum == cv.CurrentVersion);
+
+            if (version == null)
+                db.CvVersions.Add(new CvVersion { CvId = id, VersionNum = cv.CurrentVersion, CvData = cvDataJson });
+            else
+                version.CvData = cvDataJson;
         }
-        else
-        {
-            version.CvData = cvDataJson;
-        }
+
+        if (request.TemplateKey is { } newKey)
+            cv.TemplateKey = newKey;
 
         cv.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();

@@ -15,6 +15,7 @@ import CVPreview from './CVPreview'
 import SectionPanel from './SectionPanel'
 import type { EditorState, CvSection, HeaderSection, SummarySection, ExperienceSection, FormationSection, SkillsSection } from '@/types/editor'
 import { DEFAULT_TOKENS, parseTokens, type StyleTokens } from '@/components/templates/registry'
+import { trackEvent } from '@/components/PostHogProvider'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
 const ZOOM_LEVELS = [0.5, 0.65, 0.75, 0.85, 1.0]
@@ -251,6 +252,7 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
     const a = document.createElement('a')
     a.href = url; a.download = `${title}.pdf`; a.click()
     URL.revokeObjectURL(url)
+    trackEvent('pdf_downloaded', { cvId, templateKey: currentTemplateKey })
   }
 
   async function exportDocx() {
@@ -266,6 +268,7 @@ export default function CVEditor({ cvId, templateKey: initialTemplateKey, styleT
     const a = document.createElement('a')
     a.href = url; a.download = `${title}.docx`; a.click()
     URL.revokeObjectURL(url)
+    trackEvent('docx_downloaded', { cvId, templateKey: currentTemplateKey })
   }
 
   if (loading) {
