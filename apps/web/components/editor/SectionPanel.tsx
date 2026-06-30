@@ -8,10 +8,12 @@ import {
   MousePointerClick, X, Plus, Briefcase,
   GraduationCap, Star, Globe, Heart, Users, FileText,
   Eye, EyeOff, Copy, Sparkles, Loader2, Camera, Trash2,
-  Palette, AlignLeft, AlignCenter, AlignRight, LayoutTemplate,
+  Palette, AlignLeft, AlignCenter, AlignRight, LayoutTemplate, Type,
 } from 'lucide-react'
 import { HexColorPicker } from 'react-colorful'
 import RichTextEditor from './RichTextEditor'
+import RichStylePanel from './RichStylePanel'
+import { useEditorFocus } from '@/lib/editor-context'
 import type {
   CvSection, EditorAction, ExperienceEntry, ExperienceSection,
   FormationEntry, FormationSection, HeaderSection, SectionType,
@@ -155,6 +157,8 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
   const [noSectionTab, setNoSectionTab] = useState<'sections' | 'style'>('sections')
   // Tous les hooks AVANT tout early return (Rules of Hooks)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [sectionTab, setSectionTab] = useState<'content' | 'typography'>('content')
+  const { activeEditor } = useEditorFocus()
 
   // ── pas de section active ─────────────────────────────────────────────────
   if (!section) {
@@ -236,11 +240,14 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
 
   const isHidden = !!section.hidden
 
+  // Sections qui supportent la typographie riche
+  const RICH_TEXT_SECTIONS = new Set(['summary', 'experience', 'formation', 'custom'])
+
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      <div className="p-5 flex-1 min-h-0">
-        {/* Header section panel */}
-        <div className="flex justify-between items-center mb-5">
+      {/* Header */}
+      <div className="px-5 pt-4 pb-0 shrink-0">
+        <div className="flex justify-between items-center mb-3">
           <h3 className="font-semibold text-sm">{SECTION_LABELS[section.type] ?? section.type}</h3>
           <div className="flex items-center gap-1">
             <button
@@ -259,37 +266,77 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
           </div>
         </div>
 
-        {isHidden && (
-          <div className="mb-4 bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-xs text-neutral-500">
-            Section masquée — n&apos;apparaît pas dans l&apos;aperçu ni dans l&apos;export.
+        {/* Onglets Contenu / Typographie */}
+        {RICH_TEXT_SECTIONS.has(section.type) && (
+          <div className="flex border-b border-neutral-800 -mx-5 px-5">
+            <button
+              onClick={() => setSectionTab('content')}
+              className={`flex items-center gap-1.5 py-2 text-xs font-medium mr-4 border-b-2 transition ${
+                sectionTab === 'content' ? 'border-white text-white' : 'border-transparent text-neutral-500 hover:text-neutral-300'
+              }`}
+            >
+              <FileText className="w-3 h-3" /> Contenu
+            </button>
+            <button
+              onClick={() => setSectionTab('typography')}
+              className={`flex items-center gap-1.5 py-2 text-xs font-medium border-b-2 transition ${
+                sectionTab === 'typography' ? 'border-white text-white' : 'border-transparent text-neutral-500 hover:text-neutral-300'
+              }`}
+            >
+              <Type className="w-3 h-3" /> Typographie
+            </button>
           </div>
         )}
-
-        {section.type === 'header'     && <HeaderForm     section={section as HeaderSection}     dispatch={dispatch} />}
-        {section.type === 'summary'    && <SummaryForm    section={section as Extract<CvSection, { type: 'summary' }>} dispatch={dispatch} />}
-        {section.type === 'experience' && <ExperienceForm section={section as ExperienceSection} dispatch={dispatch} />}
-        {section.type === 'formation'  && <FormationForm  section={section as FormationSection}  dispatch={dispatch} />}
-        {section.type === 'skills' && (
-          <SkillsForm items={section.items} onChange={items =>
-            dispatch({ type: 'UPDATE_SECTION', section: { ...section, items } as CvSection })
-          } />
-        )}
-        {section.type === 'languages' && (
-          <LanguagesForm items={section.items} onChange={items =>
-            dispatch({ type: 'UPDATE_SECTION', section: { ...section, items } as CvSection })
-          } />
-        )}
-        {(section.type === 'interests' || section.type === 'references') && (
-          <ListForm
-            items={section.items}
-            placeholder={section.type === 'interests' ? 'ex: Randonnée, Photographie…' : 'Prénom Nom · Poste · Contact…'}
-            onChange={items =>
-              dispatch({ type: 'UPDATE_SECTION', section: { ...section, items } as CvSection })
-            }
-          />
-        )}
-        {section.type === 'custom' && <CustomForm section={section as CustomSection} dispatch={dispatch} />}
       </div>
+
+      {/* Contenu de l'onglet */}
+      {sectionTab === 'typography' && RICH_TEXT_SECTIONS.has(section.type) ? (
+        <div className="flex-1 overflow-y-auto">
+          {activeEditor ? (
+            <RichStylePanel editor={activeEditor} />
+          ) : (
+            <div className="p-5 text-center">
+              <Type className="w-8 h-8 text-neutral-700 mx-auto mb-3" />
+              <p className="text-xs text-neutral-500 leading-relaxed">
+                Cliquez dans un champ texte du CV pour accéder aux options de typographie.
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="p-5 flex-1 min-h-0">
+          {isHidden && (
+            <div className="mb-4 bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-xs text-neutral-500">
+              Section masquée — n&apos;apparaît pas dans l&apos;aperçu ni dans l&apos;export.
+            </div>
+          )}
+
+          {section.type === 'header'     && <HeaderForm     section={section as HeaderSection}     dispatch={dispatch} />}
+          {section.type === 'summary'    && <SummaryForm    section={section as Extract<CvSection, { type: 'summary' }>} dispatch={dispatch} />}
+          {section.type === 'experience' && <ExperienceForm section={section as ExperienceSection} dispatch={dispatch} />}
+          {section.type === 'formation'  && <FormationForm  section={section as FormationSection}  dispatch={dispatch} />}
+          {section.type === 'skills' && (
+            <SkillsForm items={section.items} onChange={items =>
+              dispatch({ type: 'UPDATE_SECTION', section: { ...section, items } as CvSection })
+            } />
+          )}
+          {section.type === 'languages' && (
+            <LanguagesForm items={section.items} onChange={items =>
+              dispatch({ type: 'UPDATE_SECTION', section: { ...section, items } as CvSection })
+            } />
+          )}
+          {(section.type === 'interests' || section.type === 'references') && (
+            <ListForm
+              items={section.items}
+              placeholder={section.type === 'interests' ? 'ex: Randonnée, Photographie…' : 'Prénom Nom · Poste · Contact…'}
+              onChange={items =>
+                dispatch({ type: 'UPDATE_SECTION', section: { ...section, items } as CvSection })
+              }
+            />
+          )}
+          {section.type === 'custom' && <CustomForm section={section as CustomSection} dispatch={dispatch} />}
+        </div>
+      )}
 
       {section.type !== 'header' && (
         <div className="p-5 border-t border-neutral-800 shrink-0">
