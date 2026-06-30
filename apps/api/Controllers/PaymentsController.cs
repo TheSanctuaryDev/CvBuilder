@@ -97,7 +97,7 @@ public class PaymentsController(AppDbContext db, FedaPayService fedaPay, IConfig
 
         if (evt == null) return BadRequest();
 
-        if (evt.Type == "transaction.approved")
+        if (evt.EventType == "transaction.approved")
         {
             var txId = evt.Data.Object.Id.ToString();
             var payment = await db.Payments
@@ -118,7 +118,7 @@ public class PaymentsController(AppDbContext db, FedaPayService fedaPay, IConfig
                 await db.SaveChangesAsync();
             }
         }
-        else if (evt.Type == "transaction.canceled" || evt.Type == "transaction.declined")
+        else if (evt.EventType == "transaction.canceled" || evt.EventType == "transaction.declined")
         {
             var txId = evt.Data.Object.Id.ToString();
             var payment = await db.Payments
