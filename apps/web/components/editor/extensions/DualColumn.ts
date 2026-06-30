@@ -1,5 +1,13 @@
 import { Node, mergeAttributes } from '@tiptap/core'
 
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    dualColumn: {
+      insertDualColumn: () => ReturnType
+    }
+  }
+}
+
 // Bloc "ligne deux côtés" : flex justify-between, deux cellules éditables.
 // Usage CV : "Intitulé poste [tab] 2022–2024" sur la même ligne.
 
@@ -27,20 +35,20 @@ export const DualColumn = Node.create({
 
   addCommands() {
     return {
-      insertDualColumn: () => ({ commands }: { commands: { insertContent: (c: unknown) => boolean } }) => commands.insertContent({
+      insertDualColumn: () => ({ commands }) => commands.insertContent({
         type: 'dualColumn',
         content: [
           { type: 'dualColumnCell', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Gauche' }] }] },
           { type: 'dualColumnCell', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Droite' }] }] },
         ],
       }),
-    } as Record<string, unknown>
+    }
   },
 })
 
+// DualColumnCell n'a pas de group 'block' pour ne pas être insertable hors DualColumn
 export const DualColumnCell = Node.create({
   name: 'dualColumnCell',
-  group: 'block',
   content: 'block+',
   isolating: true,
 
@@ -49,6 +57,6 @@ export const DualColumnCell = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'dual-column-cell', style: 'flex:1;' }), 0]
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'dual-column-cell', style: 'flex:1;min-width:0;' }), 0]
   },
 })

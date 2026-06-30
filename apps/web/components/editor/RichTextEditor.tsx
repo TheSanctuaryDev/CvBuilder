@@ -9,7 +9,7 @@ import { TextStyleKit } from '@tiptap/extension-text-style'
 import Highlight from '@tiptap/extension-highlight'
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Bold, Italic, Underline as UnderlineIcon,
   AlignLeft, AlignCenter, AlignRight, List,
@@ -62,7 +62,6 @@ export default function RichTextEditor({
   showToolbar = true,
 }: Props) {
   const { setActiveEditor } = useEditorFocus()
-  const containerRef = useRef<HTMLDivElement>(null)
 
   // Bubble menu state — visible only when text is selected
   const [bubble, setBubble] = useState<{ top: number; left: number } | null>(null)
@@ -73,10 +72,7 @@ export default function RichTextEditor({
       Underline,
       TextAlign.configure({ types: ['paragraph'] }),
       Placeholder.configure({ placeholder: placeholder ?? 'Rédigez ici…' }),
-      TextStyleKit.configure({
-        // LineHeight sur textStyle inline — pour bloc, on configure via paragraph
-        lineHeight: { types: ['textStyle', 'paragraph'] },
-      }),
+      TextStyleKit,
       Highlight.configure({ multicolor: true }),
       Superscript,
       Subscript,
@@ -99,15 +95,15 @@ export default function RichTextEditor({
       if (from === to) { setBubble(null); return }
       const view = editor.view
       const start = view.coordsAtPos(from)
-      const rect = containerRef.current?.getBoundingClientRect()
-      if (!rect) return
+      // Position fixed = coordonnées viewport, pas de risque de clipping
       setBubble({
-        top: start.top - rect.top - 44,
-        left: Math.max(4, start.left - rect.left - 80),
+        top: Math.max(8, start.top - 44),
+        left: Math.max(8, start.left - 80),
       })
     },
     onBlur: () => {
-      setTimeout(() => setBubble(null), 200)
+      // Délai court pour permettre le clic sur le bubble sans fermeture immédiate
+      setTimeout(() => setBubble(null), 150)
     },
     editorProps: {
       attributes: {
@@ -117,9 +113,13 @@ export default function RichTextEditor({
     },
   })
 
-  // Détruire uniquement au démontage complet
+  // Détruire uniquement au démontage complet + libérer le contexte
   useEffect(() => {
-    return () => { editor?.destroy() }
+    return () => {
+      // Libère activeEditor si c'est cet éditeur qui est enregistré
+      setActiveEditor(null)
+      editor?.destroy()
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -136,14 +136,11 @@ export default function RichTextEditor({
   if (!editor) return null
 
   return (
-    <div
-      ref={containerRef}
-      className="border border-neutral-700 rounded-xl overflow-visible focus-within:border-neutral-500 transition-colors relative"
-    >
+    <div className="border border-neutral-700 rounded-xl overflow-hidden focus-within:border-neutral-500 transition-colors relative">
       {/* Bubble mini-toolbar — apparaît sur sélection */}
       {bubble && (
         <div
-          className="absolute z-50 flex items-center gap-0.5 px-2 py-1 bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl pointer-events-auto"
+          className="fixed z-9999 flex items-center gap-0.5 px-2 py-1 bg-neutral-900 border border-neutral-700 rounded-lg shadow-xl pointer-events-auto"
           style={{ top: bubble.top, left: bubble.left }}
           onMouseDown={e => e.preventDefault()}
         >

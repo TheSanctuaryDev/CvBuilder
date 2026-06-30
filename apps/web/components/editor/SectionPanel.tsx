@@ -1,7 +1,7 @@
 // apps/web/components/editor/SectionPanel.tsx
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { nanoid } from 'nanoid'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -117,6 +117,9 @@ const SECTION_LABELS: Record<string, string> = {
   interests: 'Intérêts', references: 'Références', custom: 'Section libre',
 }
 
+// Sections qui supportent l'édition de texte riche
+const RICH_TEXT_SECTIONS = new Set(['summary', 'experience', 'formation', 'custom'])
+
 function AlignButtons({ value, onChange }: { value?: string; onChange: (v: 'left' | 'center' | 'right') => void }) {
   const opts: { v: 'left' | 'center' | 'right'; Icon: React.FC<{ className?: string }> }[] = [
     { v: 'left',   Icon: AlignLeft },
@@ -159,6 +162,11 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [sectionTab, setSectionTab] = useState<'content' | 'typography'>('content')
   const { activeEditor } = useEditorFocus()
+
+  // Reset tab et éditeur actif lors du changement de section — évite éditeur stale
+  useEffect(() => {
+    setSectionTab('content')
+  }, [activeSectionId])
 
   // ── pas de section active ─────────────────────────────────────────────────
   if (!section) {
@@ -239,9 +247,6 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
   }
 
   const isHidden = !!section.hidden
-
-  // Sections qui supportent la typographie riche
-  const RICH_TEXT_SECTIONS = new Set(['summary', 'experience', 'formation', 'custom'])
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">

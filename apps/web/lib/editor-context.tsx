@@ -24,8 +24,11 @@ export function EditorFocusProvider({ children }: { children: React.ReactNode })
   )
 }
 
+const NOOP_CONTEXT: EditorFocusContextValue = {
+  activeEditor: null,
+  setActiveEditor: () => {},
+}
+
 export function useEditorFocus(): EditorFocusContextValue {
-  const ctx = useContext(EditorFocusContext)
-  if (!ctx) throw new Error('useEditorFocus must be used inside EditorFocusProvider')
-  return ctx
+  return useContext(EditorFocusContext) ?? NOOP_CONTEXT
 }

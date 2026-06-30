@@ -126,6 +126,7 @@ export default function RichStylePanel({ editor }: Props) {
   const currentFontFamily = editor.getAttributes('textStyle').fontFamily ?? ''
   const currentFontSize = editor.getAttributes('textStyle').fontSize?.replace('px', '') ?? ''
   const currentLetterSpacing = editor.getAttributes('textStyle').letterSpacing ?? ''
+  // lineHeight est géré par setMark('textStyle') — lecture depuis textStyle
   const currentLineHeight = editor.getAttributes('textStyle').lineHeight ?? ''
 
   const setFontSize = useCallback((size: string) => {
@@ -152,9 +153,9 @@ export default function RichStylePanel({ editor }: Props) {
 
   const setTextTransform = useCallback((transform: string) => {
     if (!transform) {
-      editor.chain().focus().setMark('textStyle', { textTransform: null }).run()
+      editor.chain().focus().unsetTextTransform().run()
     } else {
-      editor.chain().focus().setMark('textStyle', { textTransform: transform }).run()
+      editor.chain().focus().setTextTransform(transform).run()
     }
   }, [editor])
 
@@ -343,8 +344,8 @@ export default function RichStylePanel({ editor }: Props) {
         value={currentLineHeight}
         onChange={e => {
           const v = e.target.value
-          if (v) editor.chain().focus().setMark('textStyle', { lineHeight: v }).run()
-          else editor.chain().focus().setMark('textStyle', { lineHeight: null }).run()
+          if (v) editor.chain().focus().setLineHeight(v).run()
+          else editor.chain().focus().unsetLineHeight().run()
         }}
         className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1.5 text-xs text-white mb-3 focus:outline-none focus:border-neutral-500"
       >
@@ -390,7 +391,7 @@ export default function RichStylePanel({ editor }: Props) {
         </ToggleBtn>
         <ToggleBtn
           active={false}
-          onClick={() => (editor.chain().focus() as unknown as { insertDualColumn: () => { run: () => void } }).insertDualColumn().run()}
+          onClick={() => editor.chain().focus().insertDualColumn().run()}
           title="Deux colonnes sur une ligne"
         >
           <Columns2 className="w-3.5 h-3.5" />
@@ -402,18 +403,26 @@ export default function RichStylePanel({ editor }: Props) {
         <>
           <SectionTitle>Marqueur de liste</SectionTitle>
           <div className="grid grid-cols-4 gap-1 mb-3">
-            {BULLET_MARKERS.map(({ marker, label, char }) => (
-              <button
-                key={marker}
-                type="button"
-                onMouseDown={e => { e.preventDefault(); editor.chain().focus().setBulletMarker(marker).run() }}
-                title={label}
-                className="flex flex-col items-center py-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition text-xs gap-0.5"
-              >
-                <span className="text-sm leading-none">{char || '∅'}</span>
-                <span className="text-[9px] text-neutral-500">{label}</span>
-              </button>
-            ))}
+            {BULLET_MARKERS.map(({ marker, label, char }) => {
+              const activeMarker = editor.getAttributes('bulletList').bulletMarker ?? 'disc'
+              const isActive = activeMarker === marker
+              return (
+                <button
+                  key={marker}
+                  type="button"
+                  onMouseDown={e => { e.preventDefault(); editor.chain().focus().setBulletMarker(marker).run() }}
+                  title={label}
+                  className={`flex flex-col items-center py-1.5 rounded-md transition text-xs gap-0.5 border ${
+                    isActive
+                      ? 'bg-white text-black border-white'
+                      : 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white border-transparent'
+                  }`}
+                >
+                  <span className="text-sm leading-none">{char || '∅'}</span>
+                  <span className={`text-[9px] ${isActive ? 'text-neutral-600' : 'text-neutral-500'}`}>{label}</span>
+                </button>
+              )
+            })}
           </div>
         </>
       )}
