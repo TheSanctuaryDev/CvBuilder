@@ -27,7 +27,7 @@ export default function CvCard({ cv }: { cv: Cv }) {
       <div className="flex justify-between items-start mb-3">
         <h3 className="font-semibold text-white truncate">{cv.title}</h3>
         {cv.isPremium && (
-          <span className="text-xs bg-amber-400/10 text-amber-400 border border-amber-400/20 rounded-full px-2 py-0.5 ml-2 shrink-0">
+          <span className="text-xs bg-white/10 text-white border border-white/20 rounded-full px-2 py-0.5 ml-2 shrink-0">
             Premium
           </span>
         )}
@@ -47,7 +47,7 @@ export default function CvCard({ cv }: { cv: Cv }) {
         </Link>
         <Link
           href={`/cv/${cv.id}/edit`}
-          className="flex-1 text-center text-sm bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 rounded-lg px-3 py-2 transition"
+          className="flex-1 text-center text-sm bg-white/10 text-white hover:bg-white/20 rounded-lg px-3 py-2 transition"
         >
           Modifier
         </Link>

@@ -20,16 +20,21 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Rediriger vers /login si non authentifié sur routes dashboard ou /cv
-  if (!user && (request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/cv/'))) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  const { pathname } = request.nextUrl
+
+  // Rediriger vers /login si non authentifié sur routes protégées
+  // /cv/nouveau est public (lazy registration) ; seuls /cv/[id]/* sont protégés
+  const isDashboard = pathname.startsWith('/dashboard')
+  const isCvRoute = pathname.startsWith('/cv/') && !pathname.startsWith('/cv/nouveau')
+  const isAdmin = pathname.startsWith('/admin')
+  if (!user && (isDashboard || isCvRoute || isAdmin)) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('returnTo', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
-  // Rediriger vers /dashboard si déjà connecté sur pages auth
-  if (user && (
-    request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname === '/register'
-  )) {
+  // Rediriger vers /dashboard si déjà connecté sur pages auth (sans returnTo)
+  if (user && (pathname === '/login' || pathname === '/register')) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

@@ -3,7 +3,9 @@ export type Template = {
   name: string
   templateKey: string
   isPremium: boolean
+  isActive: boolean
   previewUrl: string | null
+  styleTokens: string
 }
 
 export type Cv = {
@@ -15,6 +17,7 @@ export type Cv = {
   currentVersion: number
   createdAt: string
   updatedAt: string
+  cvData?: CvData
 }
 
 export type CvVersion = {
@@ -27,10 +30,15 @@ export type CvVersion = {
   createdAt: string
 }
 
+export type PhoneEntry = {
+  indicatif: string
+  number: string
+}
+
 export type CvData = {
   fullName: string
-  email?: string
-  phone?: string
+  emails?: string[]
+  phones?: PhoneEntry[]
   address?: string
   linkedIn?: string
   gitHub?: string
@@ -45,4 +53,5 @@ export type CvData = {
   interests?: string[]
   selectedTemplate?: string
   isPremium?: boolean
+  sectionOrder?: string[]
 }

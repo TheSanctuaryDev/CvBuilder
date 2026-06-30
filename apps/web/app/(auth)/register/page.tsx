@@ -1,12 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { FileText } from 'lucide-react'
 
-export default function RegisterPage() {
+function safeReturnTo(param: string | null): string {
+  if (!param) return '/dashboard'
+  // Autoriser uniquement les chemins relatifs internes (pas d'open redirect)
+  if (param.startsWith('/') && !param.startsWith('//')) return param
+  return '/dashboard'
+}
+
+function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnTo = safeReturnTo(searchParams.get('returnTo'))
+  const fromWizard = returnTo === '/cv/nouveau'
+
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,12 +43,29 @@ export default function RegisterPage() {
       return
     }
 
-    router.push('/dashboard')
-    router.refresh()
+    // Email de bienvenue — fire-and-forget, non bloquant
+    fetch('/api/emails/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: fullName }),
+    }).catch(() => {})
+
+    // BUG-12/24 : supprimer router.refresh() — cause une race condition et un flash visuel.
+    // Le middleware Supabase rafraîchit la session via cookie automatiquement.
+    router.push(returnTo)
   }
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8">
+      {fromWizard && (
+        <div className="flex items-start gap-3 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 mb-6">
+          <FileText className="w-4 h-4 text-neutral-400 mt-0.5 shrink-0" />
+          <p className="text-sm text-neutral-300">
+            Votre CV est prêt. Créez un compte pour le finaliser — vous serez automatiquement redirigé.
+          </p>
+        </div>
+      )}
+
       <h2 className="text-xl font-semibold mb-6">Créer un compte</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,7 +76,7 @@ export default function RegisterPage() {
             value={fullName}
             onChange={e => setFullName(e.target.value)}
             required
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -58,7 +87,7 @@ export default function RegisterPage() {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -70,7 +99,7 @@ export default function RegisterPage() {
             onChange={e => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-400"
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-white"
           />
         </div>
 
@@ -79,7 +108,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-amber-400 text-black font-semibold rounded-lg px-4 py-3 hover:bg-amber-300 disabled:opacity-50 transition"
+          className="w-full bg-white text-black font-semibold rounded-lg px-4 py-3 hover:bg-neutral-200 disabled:opacity-50 transition"
         >
           {loading ? 'Création...' : "Créer mon compte"}
         </button>
@@ -87,8 +116,21 @@ export default function RegisterPage() {
 
       <p className="text-center text-neutral-400 text-sm mt-6">
         Déjà un compte ?{' '}
-        <Link href="/login" className="text-amber-400 hover:underline">Se connecter</Link>
+        <Link
+          href={`/login${returnTo !== '/dashboard' ? `?returnTo=${encodeURIComponent(returnTo)}` : ''}`}
+          className="text-white hover:underline"
+        >
+          Se connecter
+        </Link>
       </p>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   )
 }

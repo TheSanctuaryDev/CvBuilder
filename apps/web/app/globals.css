@@ -16,3 +16,97 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* ── Tiptap editor ────────────────────────────────────────────────────── */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #525252;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap:focus { outline: none; }
+.tiptap p { margin: 0; }
+.tiptap p + p { margin-top: 0.2em; }
+
+/* Mode "plain" : la mise en forme décorative est masquée dans la zone d'édition.
+   Seul le CV preview affiche couleurs, tailles et polices personnalisées.
+   Le gras, l'italique, le souligné et le barré restent visibles (sémantiques). */
+.tiptap-plain span[style] {
+  color: inherit !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  letter-spacing: inherit !important;
+  text-transform: inherit !important;
+  line-height: inherit !important;
+}
+.tiptap-plain mark {
+  background-color: rgba(255,255,255,0.12) !important;
+  color: inherit !important;
+}
+/* Indication visuelle discrète que du style est appliqué */
+.tiptap-plain span[style]::after {
+  content: "";
+}
+
+
+/* ── Tiptap dual-column ────────────────────────────────────────────────── */
+.tiptap div[data-type="dual-column"] {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.tiptap div[data-type="dual-column-cell"] {
+  flex: 1;
+  border: 1px dashed #3a3a3a;
+  border-radius: 4px;
+  padding: 2px 4px;
+  min-width: 60px;
+}
+.tiptap div[data-type="dual-column-cell"]:focus-within {
+  border-color: #6b7280;
+}
+
+/* ── Custom bullet markers ─────────────────────────────────────────────── */
+.tiptap ul[data-bullet-marker],
+.cv-rich-text ul[data-bullet-marker] {
+  list-style: none;
+  padding-left: 1.4em;
+}
+.tiptap ul[data-bullet-marker] li,
+.cv-rich-text ul[data-bullet-marker] li {
+  position: relative;
+}
+.tiptap ul[data-bullet-marker] li::before,
+.cv-rich-text ul[data-bullet-marker] li::before {
+  content: var(--bullet-content, "•");
+  color: var(--bullet-color, currentColor);
+  font-size: var(--bullet-size, 1em);
+  position: absolute;
+  left: -1.2em;
+  top: 0;
+  line-height: inherit;
+}
+
+/* ── Rendu rich-text dans le CV ───────────────────────────────────────── */
+.cv-rich-text strong  { font-weight: 700; }
+.cv-rich-text em      { font-style: italic; }
+.cv-rich-text u       { text-decoration: underline; }
+.cv-rich-text p       { margin: 0; line-height: inherit; }
+.cv-rich-text p + p   { margin-top: 0.25em; }
+.cv-rich-text sup     { vertical-align: super; font-size: 0.75em; }
+.cv-rich-text sub     { vertical-align: sub; font-size: 0.75em; }
+.cv-rich-text s       { text-decoration: line-through; }
+.cv-rich-text ul      { padding-left: 1.4em; }
+.cv-rich-text ul li   { list-style: disc; }
+.cv-rich-text mark    { padding: 0.1em 0.2em; border-radius: 2px; }
+.cv-rich-text div[data-type="dual-column"] {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.cv-rich-text div[data-type="dual-column-cell"] { flex: 1; }
+

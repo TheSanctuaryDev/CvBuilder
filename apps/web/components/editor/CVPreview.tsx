@@ -1,0 +1,98 @@
+// apps/web/components/editor/CVPreview.tsx
+'use client'
+
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import type { CvSection, EditorAction } from '@/types/editor'
+import type { StyleTokens } from '@/components/templates/registry'
+import { generatePreviewVars } from '@/components/templates/registry'
+import SectionBlock from './SectionBlock'
+
+interface CVPreviewProps {
+  sections: CvSection[]
+  activeSectionId: string | null
+  dispatch: React.Dispatch<EditorAction>
+  isDragDisabled?: boolean
+  templateKey?: string
+  styleTokens?: StyleTokens
+}
+
+export default function CVPreview({
+  sections,
+  activeSectionId,
+  dispatch,
+  isDragDisabled,
+  templateKey = 'classic',
+  styleTokens,
+}: CVPreviewProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  const sorted = [...sections].sort((a, b) => a.order - b.order)
+  // Les sections masquées ne s'affichent pas dans le rendu A4
+  const visible = sorted.filter(s => !s.hidden)
+
+  // BUG-02 : le DnD opère sur `visible` uniquement — les sections masquées
+  // n'ont pas de noeud DOM et ne doivent pas être incluses dans le SortableContext.
+  // Le reducer REORDER place les sections non-présentes dans action.ids à la fin.
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = visible.findIndex(s => s.id === active.id)
+    const newIndex = visible.findIndex(s => s.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+
+    const reordered = [...visible]
+    const [moved] = reordered.splice(oldIndex, 1)
+    reordered.splice(newIndex, 0, moved)
+    // Passe uniquement les IDs visibles ; les masqués sont gérés par le reducer
+    dispatch({ type: 'REORDER', ids: reordered.map(s => s.id) })
+  }
+
+  const cssVars = styleTokens ? generatePreviewVars(styleTokens) : {}
+
+  return (
+    <div
+      className="bg-white shadow-2xl mx-auto"
+      style={{ width: 794, minHeight: 1123, padding: '60px 72px', ...cssVars }}
+    >
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={visible.map(s => s.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-1">
+            {visible.map(section => (
+              <SectionBlock
+                key={section.id}
+                section={section}
+                isActive={section.id === activeSectionId}
+                onClick={() => dispatch({ type: 'SET_ACTIVE', id: section.id })}
+                isDragDisabled={isDragDisabled}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
+  )
+}
