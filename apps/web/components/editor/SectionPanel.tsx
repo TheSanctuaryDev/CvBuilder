@@ -153,6 +153,8 @@ interface Props {
 export default function SectionPanel({ sections, activeSectionId, dispatch, styleTokens, onStyleChange }: Props) {
   const section = sections.find(s => s.id === activeSectionId)
   const [noSectionTab, setNoSectionTab] = useState<'sections' | 'style'>('sections')
+  // Tous les hooks AVANT tout early return (Rules of Hooks)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   // ── pas de section active ─────────────────────────────────────────────────
   if (!section) {
@@ -226,8 +228,6 @@ export default function SectionPanel({ sections, activeSectionId, dispatch, styl
     )
   }
 
-  // BUG-23 : confirmation deux étapes sans window.confirm() (bloquant + impossible à tester SSR)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
   function handleDelete() {
     if (!confirmingDelete) { setConfirmingDelete(true); return }
     dispatch({ type: 'DELETE_SECTION', id: section!.id })
